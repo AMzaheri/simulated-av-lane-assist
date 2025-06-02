@@ -1,0 +1,2 @@
+# simulated-av-lane-assist
+A simulated autonomous driving project implementing a lane-keeping assistant using a hybrid Python-C++ architecture with MLOps principles.
