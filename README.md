@@ -3,6 +3,7 @@ A simulated autonomous driving project implementing a lane-keeping assistant usi
 
 ## Project Structure
 
+```
 ├── .gitignore
 ├── README.md
 ├── app/
@@ -12,3 +13,5 @@ A simulated autonomous driving project implementing a lane-keeping assistant usi
 └── src/
     ├── cpp/
     └── python/
+```
+
