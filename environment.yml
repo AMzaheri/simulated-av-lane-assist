@@ -19,5 +19,6 @@ dependencies:
   - zlib=1.2.13=h18a0788_1
   - pip:
       - numpy==2.0.2
+      - pillow==11.2.1
       - pygame==2.6.1
 prefix: /Users/afsanehm/anaconda3/envs/lane_keeping
