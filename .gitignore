@@ -192,3 +192,23 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+
+# C++ build artifacts
+build/
+bin/
+*.o
+*.lo
+*.la
+*.so
+*.a
+*.dylib
+*.exe
+*.dll
+# CMake
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
