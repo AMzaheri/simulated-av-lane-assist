@@ -23,7 +23,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data" # To run the script from the root directory
-CURRENT_RUN_NAME = "run_v2_Diversified_WiderRangeOffsets" 
+CURRENT_RUN_NAME = "run_v3_Diversified_RandomCARSPEED" 
 NUM_SAMPLES = 5000 # 5000 Target number of training samples
 
 IMAGES_SUBDIR = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "images")
@@ -52,6 +52,15 @@ def generate_straight_road_data(screen, clock, car, num_samples):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+
+        # --- Update Car Position ---
+        # Randomly vary car speed for diversity
+        # Define a range for speed variation, e.g., +/- 20% of original CAR_SPEED
+        min_speed = CAR_SPEED * 0.8 # e.g., 80% of normal speed
+        max_speed = CAR_SPEED * 1.2 # e.g., 120% of normal speed
+        
+        # Apply random speed within the defined range
+        car.speed = np.random.uniform(min_speed, max_speed) 
 
         # --- Update Car Position ---
         car.move()
