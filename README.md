@@ -54,3 +54,18 @@ This configuration yields a dataset of consistently centered driving, ideal for 
 * **No Empty Road Frames**: Includes logic to prevent saving images where the car is off-screen during loop reset.
 
 This dataset provides more varied horizontal car positions while maintaining line visibility, offering richer training data for robust lane-following.
+
+#### Run `run_v3_Diversified_RandomCARSPEED`
+
+**Purpose:** To enhance dataset diversity by introducing variations in the car's speed during simulation. This helps the model become more robust to different driving speeds in real-world scenarios.
+
+**Key Parameters used in `data_generator.py` for this run:**
+
+* **`CURRENT_RUN_NAME`**: `run_v3_Diversified_RandomCARSPEED`
+* **`NUM_SAMPLES`**: 5000
+* **Car Speed Variation**: `np.random.uniform(CAR_SPEED * 0.8, CAR_SPEED * 1.2)` (Car speed randomly varies between 80% and 120% of the base `CAR_SPEED`).
+* **Random Steering (Frequency)**: `np.random.rand() < 0.15` (15% chance).
+* **Random Steering (Magnitude)**: `np.random.uniform(0.1, 0.4)`.
+* **Other parameters**: Boundary correction strength (`steer(4)`), angle correction (`steer(2)` with `95/85` thresholds), and X-position reset on loop (`+/- 20px`) remain consistent with `run_v2`.
+
+This dataset adds speed variation to the horizontally diversified data.
