@@ -23,7 +23,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data" # To run the script from the root directory
-CURRENT_RUN_NAME = "run_v3_Diversified_RandomCARSPEED" 
+CURRENT_RUN_NAME = "run_v4_Diversified_RandomCameraView" 
 NUM_SAMPLES = 5000 # 5000 Target number of training samples
 
 IMAGES_SUBDIR = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "images")
@@ -105,6 +105,15 @@ def generate_straight_road_data(screen, clock, car, num_samples):
         draw_lane_lines(screen)
         car.draw(screen)
         
+        # --- Diversify Camera Position ---
+        # Randomly vary camera's Y offset from the car's center
+        # Define a range for camera offset variation, e.g., +/- 10-20 pixels from original
+        
+        base_camera_offset_y = CAMERA_Y_OFFSET_FROM_CAR_CENTER # Store original base value
+        
+        car.camera_offset_y = base_camera_offset_y + np.random.uniform(-10, 10) 
+        
+
         # --- Capture Camera View & Determine Label ---
         camera_view_array, camera_rect = get_camera_view(screen, car)
 
