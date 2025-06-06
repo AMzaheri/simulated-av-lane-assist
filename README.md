@@ -36,4 +36,21 @@ This project uses `src/python/data_generator.py` to simulate car driving and col
 
 This configuration yields a dataset of consistently centered driving, ideal for initial model training where stable lane-following is the primary focus.
 
+#### Run `run_v2_Diversified_WiderRangeOffsets`
 
+**Purpose:** To generate a more diverse dataset by allowing the car to explore a wider range of horizontal offsets within the lane. This helps the model learn to handle situations where the car is not perfectly centered.
+
+**Key Parameters used in `data_generator.py` for this run:**
+
+* **`CURRENT_RUN_NAME`**: `run_v2_Diversified_WiderRangeOffsets`
+* **`NUM_SAMPLES`**: 5000 (Generated after stabilization from `run_v1`, focusing on horizontal diversity.)
+* **Random Steering (Frequency)**: `np.random.rand() < 0.15` (Increased from 0.03; 15% chance per frame for random steering input).
+* **Random Steering (Magnitude)**: `np.random.uniform(0.1, 0.4)` (Increased from 0.1-0.2; allowing slightly larger steering nudges).
+* **Safe Bounds (`safe_left_bound`, `safe_right_bound`)**: No pixel buffer (car corrects as soon as its edge touches the road boundary) - *Same as `run_v1`*.
+* **Boundary Correction Strength (`car.steer(X)` when near X-bounds)**: `steer(-4)` for left bound, `steer(4)` for right bound (Strong correction) - *Same as `run_v1`*.
+* **Angle Correction Thresholds (`car.angle > X` / `< Y`)**: `95` degrees (for left angle), `85` degrees (for right angle) - *Same as `run_v1`*.
+* **Angle Correction Strength (`car.steer(X)` when angle deviates)**: `steer(-2)` for angle > 95, `steer(2)` for angle < 85 - *Same as `run_v1`*.
+* **Car X-Position Reset on Loop**: `SCREEN_WIDTH / 2 + np.random.uniform(-20, 20)` - *Same as `run_v1`*.
+* **No Empty Road Frames**: Includes logic to prevent saving images where the car is off-screen during loop reset.
+
+This dataset provides more varied horizontal car positions while maintaining line visibility, offering richer training data for robust lane-following.
