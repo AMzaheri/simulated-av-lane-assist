@@ -14,4 +14,26 @@ A simulated autonomous driving project implementing a lane-keeping assistant usi
     ├── cpp/
     └── python/
 ```
+### Dataset Generation - Run Configurations
+
+This project uses `src/python/data_generator.py` to simulate car driving and collect image-label pairs. Different configurations are used to generate varied datasets, stored in versioned subdirectories under the `data/` folder.
+
+#### Run `run_v1_CarClose2Centre`
+
+**Purpose:** To generate a dataset focused on keeping the car close to the lane center, ensuring both lane lines are always visible. This configuration aims for stable driving behavior.
+
+**Key Parameters used in `data_generator.py` for this run:**
+
+* **`CURRENT_RUN_NAME`**: `run_v1_CarClose2Centre`
+* **`NUM_SAMPLES`**: 6400 (This run is optimized to maintain stable capture of both lines up to this number of images. For significantly larger datasets, further tuning might be needed.)
+* **Random Steering (Frequency)**: `np.random.rand() < 0.03` (3% chance per frame for random steering input).
+* **Random Steering (Magnitude)**: `np.random.uniform(0.1, 0.2)` (Small, gentle steering nudges).
+* **Safe Bounds (`safe_left_bound`, `safe_right_bound`)**: No pixel buffer (car corrects as soon as its edge touches the road boundary).
+* **Boundary Correction Strength (`car.steer(X)` when near X-bounds)**: `steer(-4)` for left bound, `steer(4)` for right bound (Strong correction to keep car centered).
+* **Angle Correction Thresholds (`car.angle > X` / `< Y`)**: `95` degrees (for left angle), `85` degrees (for right angle) (Correction kicks in sooner for small deviations).
+* **Angle Correction Strength (`car.steer(X)` when angle deviates)**: `steer(-2)` for angle > 95, `steer(2)` for angle < 85 (Moderate correction for angle deviations).
+* **Car X-Position Reset on Loop**: `SCREEN_WIDTH / 2 + np.random.uniform(-20, 20)` (Car's X-position resets to center +/- 20 pixels when looping).
+
+This configuration yields a dataset of consistently centered driving, ideal for initial model training where stable lane-following is the primary focus.
+
 

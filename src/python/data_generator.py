@@ -20,31 +20,14 @@ from simulator import (
     Car, draw_road, draw_lane_lines, get_camera_view
 )
 
-# --- DATA GENERATION CONFIGURATION NOTES ---
-# The current simulation parameters (e.g., random steering frequency/magnitude,
-# steering correction strength, and car X-position reset upon loop)
-# are tuned to reliably generate ~6400 images
-# where both lane lines (yellow and white dashed) remain consistently within
-# the camera's field of view.
-
-# If a significantly larger dataset (e.g., tens or hundreds of thousands of images)
-# is required, these parameters, particularly those controlling random steering
-# and car correction/boundary behavior, may need to be re-evaluated and adjusted
-# to maintain visual consistency across a longer simulation run without lines
-# disappearing or the car leaving the road.
-# Consider modifying:
-# - NUM_SAMPLES: For overall dataset size.
-# - np.random.uniform parameters for random steering: To control deviation magnitude.
-# - np.random.rand() threshold for random steering: To control deviation frequency.
-# - car.steer() values in boundary/angle correction: To control correction strength.
-# - The X-position reset range at car loop: For horizontal diversity upon reset.
-# --- END CONFIGURATION NOTES ---
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data" # To run the script from the root directory
-IMAGES_SUBDIR = "images"
-LABELS_FILE = "labels.csv"
+CURRENT_RUN_NAME = "run_v1_CarClose2Centre" 
 NUM_SAMPLES = 6400 # 5000 Target number of training samples
+
+IMAGES_SUBDIR = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "images")
+LABELS_FILE_PATH = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "labels.csv")
 #-------------------------------------------------------Automated Driving Logic
 
 def generate_straight_road_data(screen, clock, car, num_samples):
@@ -57,8 +40,8 @@ def generate_straight_road_data(screen, clock, car, num_samples):
 
     print(f"Current Working Directory: {os.getcwd()}")
 
-    os.makedirs(os.path.join(DATA_DIR, IMAGES_SUBDIR), exist_ok=True)
-    labels_filepath = os.path.join(DATA_DIR, LABELS_FILE)
+    os.makedirs(IMAGES_SUBDIR, exist_ok=True)
+    labels_filepath = LABELS_FILE_PATH
 
     with open(labels_filepath, 'w') as f:
         f.write("image_filename,steering_angle\n")
@@ -96,9 +79,9 @@ def generate_straight_road_data(screen, clock, car, num_samples):
 
         # If car goes outside safe bounds, gently steer it back towards center
         if car.x < safe_left_bound:
-            car.steer(-3) # Changed -2 to -3 # Steer right
+            car.steer(-4) # Changed -2 to -3 and then -4 # Steer right
         elif car.x > safe_right_bound:
-            car.steer(3) # Steer left: changed 2 to 3
+            car.steer(4) # Steer left: changed 2 to 3, then to 4
         
         # Also ensure car angle doesn't drift too far from straight ahead
         # If car's angle deviates significantly, correct it back towards straight (90 degrees)
@@ -161,7 +144,7 @@ def generate_straight_road_data(screen, clock, car, num_samples):
 
         # --- Save Sample ---
         image_filename = f"frame_{samples_generated:05d}.png" # e.g., frame_00000.png
-        image_filepath = os.path.join(DATA_DIR, IMAGES_SUBDIR, image_filename)
+        image_filepath = os.path.join(IMAGES_SUBDIR, image_filename)
         #print(f"Attempting to save image to: {image_filepath}")
     
         # Save the image (convert normalized float array back to uint8 for Pillow)
