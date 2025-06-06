@@ -69,3 +69,19 @@ This dataset provides more varied horizontal car positions while maintaining lin
 * **Other parameters**: Boundary correction strength (`steer(4)`), angle correction (`steer(2)` with `95/85` thresholds), and X-position reset on loop (`+/- 20px`) remain consistent with `run_v2`.
 
 This dataset adds speed variation to the horizontally diversified data.
+
+#### Run `run_v4_VariedCameraPosition`
+
+**Purpose:** To further diversify the dataset by simulating variations in the camera's vertical mounting position relative to the car. This improves the model's robustness to slight changes in camera setup or vehicle pitch/roll.
+
+**Key Parameters used in `data_generator.py` for this run:**
+
+* **`CURRENT_RUN_NAME`**: `run_v4_VariedCameraPosition`
+* **`NUM_SAMPLES`**: 5000
+* **Camera Position Variation**: `car.camera_offset_y = base_camera_offset_y + np.random.uniform(-10, 10)` (Camera's Y-offset from car center varies randomly by +/- 10 pixels from its base value).
+* **Car Speed Variation**: `np.random.uniform(CAR_SPEED * 0.8, CAR_SPEED * 1.2)`.
+* **Random Steering (Frequency)**: `np.random.rand() < 0.15`.
+* **Random Steering (Magnitude)**: `np.random.uniform(0.1, 0.4)`.
+* **Other parameters**: Boundary correction strength (`steer(4)`), angle correction (`steer(2)` with `95/85` thresholds), X-position reset on loop (`+/- 20px`), and logic to prevent empty road frames remain consistent.
+
+This dataset adds camera perspective variability, making the training data more comprehensive and applicable to a wider range of real-world conditions.
