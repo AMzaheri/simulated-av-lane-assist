@@ -13,21 +13,22 @@ GRAY = (100, 100, 100) # Road color
 YELLOW = (255, 255, 0)
 
 # Road parameters
-LANE_WIDTH = 150 # Width of a single lane
+LANE_WIDTH = 125 # Width of a single lane
 ROAD_WIDTH = LANE_WIDTH * 2 # Two lanes total
 LANE_LINE_WIDTH = 5
 
 # Car parameters
 CAR_WIDTH = 30
 CAR_HEIGHT = 50
-CAR_SPEED = 5 # Pixels per frame
+CAR_SPEED = 3 # Pixels per frame
 CAR_STEERING_SPEED = 2 # Degrees per frame
 
 # Camera parameters (what the ML model "sees")
-CAMERA_WIDTH = 100
-CAMERA_HEIGHT = 50
-CAMERA_OFFSET_Y = -10 # How far in front of the car the camera is
-CAMERA_Y_RELATIVE_TO_CAR_FRONT = -CAR_HEIGHT / 2 - CAMERA_OFFSET_Y
+CAMERA_WIDTH = 200
+CAMERA_HEIGHT = 150
+CAMERA_OFFSET_Y = -5 # How far in front of the car the camera is
+#CAMERA_Y_RELATIVE_TO_CAR_FRONT = -CAR_HEIGHT / 2 - CAMERA_OFFSET_Y
+CAMERA_Y_OFFSET_FROM_CAR_CENTER = -70
 
 #-----------------------------------------------------Car clasee
 # This class will manage the car's position, orientation, and 
@@ -80,7 +81,7 @@ def draw_lane_lines(screen):
     pygame.draw.rect(screen, YELLOW, (right_line_x - LANE_LINE_WIDTH / 2, 0, LANE_LINE_WIDTH, SCREEN_HEIGHT))
 
     # Center Dashed Line (Optional, for 2-way traffic)
-    # pygame.draw.rect(screen, WHITE, (road_center_x - LANE_LINE_WIDTH / 2, 0, LANE_LINE_WIDTH, SCREEN_HEIGHT))
+    #pygame.draw.rect(screen, WHITE, (road_center_x - LANE_LINE_WIDTH / 2, 0, LANE_LINE_WIDTH, SCREEN_HEIGHT))
 
 #------------------------------------------------ Camera View Capture
 def get_camera_view(screen, car):
@@ -94,7 +95,8 @@ def get_camera_view(screen, car):
     # Calculate the top-left corner of the camera view
     # The camera is always fixed at the top of the car's bounding box
     camera_x = car.x - CAMERA_WIDTH / 2
-    camera_y = car.y + CAMERA_Y_RELATIVE_TO_CAR_FRONT # From the car's "front"
+    #camera_y = car.y + CAMERA_Y_RELATIVE_TO_CAR_FRONT # From the car's "front"
+    camera_y = car.y + CAMERA_Y_OFFSET_FROM_CAR_CENTER 
 
     # Ensure camera view is within screen bounds
     camera_x = max(0, min(camera_x, SCREEN_WIDTH - CAMERA_WIDTH))
@@ -119,6 +121,8 @@ def get_camera_view(screen, car):
 
     # Normalize to 0-1 range
     normalized_img = grayscale_img / 255.0
+    # colour image to test
+    ##normalized_img = img_array / 255.0 # Normalize RGB pixel values to 0-1
 
     return normalized_img, camera_rect # Return the array and the rect for drawing (optional)
 
@@ -159,7 +163,7 @@ if __name__ == "__main__":
         # Capture and display camera view (for debugging)
         camera_view, camera_rect = get_camera_view(screen, car)
         # Resize the camera view for display, if desired (e.g., 2x larger)
-        display_camera_view = pygame.transform.scale(pygame.surfarray.make_surface((camera_view * 255).astype(np.uint8)), (CAMERA_WIDTH * 2, CAMERA_HEIGHT * 2))
+        display_camera_view = pygame.transform.scale(pygame.surfarray.make_surface((camera_view * 255).astype(np.uint8)), (CAMERA_WIDTH // 2, CAMERA_HEIGHT // 2))
         screen.blit(display_camera_view, (10, 10)) # Display in top-left corner
         pygame.draw.rect(screen, (255,0,0), camera_rect, 1) # Draw red rectangle around captured area
 
