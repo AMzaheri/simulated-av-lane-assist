@@ -23,8 +23,8 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data" # To run the script from the root directory
-CURRENT_RUN_NAME = "run_v1_CarClose2Centre" 
-NUM_SAMPLES = 6400 # 5000 Target number of training samples
+CURRENT_RUN_NAME = "run_v2_Diversified_WiderRangeOffsets" 
+NUM_SAMPLES = 5000 # 5000 Target number of training samples
 
 IMAGES_SUBDIR = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "images")
 LABELS_FILE_PATH = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "labels.csv")
@@ -67,10 +67,10 @@ def generate_straight_road_data(screen, clock, car, num_samples):
             car.x = SCREEN_WIDTH / 2 + np.random.uniform(-20, 20) # Reset to center +/- 20 pixels
             # --- END of RESET X POSITION ---
 
-        # --- Simulate Car Deviations and Keep it on Road ---
+        # --- Simulate Car Deviations ---
         # Introduce slight random steering for diversity
-        if np.random.rand() < 0.03: # Changed from 0.2 to 0.03 (e.g., 3% chance per frame)
-            car.steer(np.random.choice([-1, 1]) * np.random.uniform(0.1, 0.2)) # 1.0)) # Smaller random steer for now
+        if np.random.rand() < 0.15: # Changed from 0.2 to 0.03 (e.g., 3% chance per frame)
+            car.steer(np.random.choice([-1, 1]) * np.random.uniform(0.1, 0.4)) # 1.0)) # Smaller random steer for now
 
         # Define safe driving bounds for the car's X position
         # These should be slightly inside the drawn road to avoid capturing black edges
@@ -143,23 +143,30 @@ def generate_straight_road_data(screen, clock, car, num_samples):
         steering_label = -horizontal_offset * 0.1 # Tune this factor (e.g., 0.1)
 
         # --- Save Sample ---
-        image_filename = f"frame_{samples_generated:05d}.png" # e.g., frame_00000.png
-        image_filepath = os.path.join(IMAGES_SUBDIR, image_filename)
-        #print(f"Attempting to save image to: {image_filepath}")
-    
-        # Save the image (convert normalized float array back to uint8 for Pillow)
-        img_to_save = Image.fromarray((camera_view_array * 255).astype(np.uint8), mode='L') # 'RGB' for colour img, L for grayscale
-        img_to_save.save(image_filepath)
+        # Add a check to only save the image if the car is visibly on screen
+        # We allow a small buffer (e.g., CAR_HEIGHT) to ensure it's fully in frame
+        if car.y >= -CAR_HEIGHT / 2 and car.y <= SCREEN_HEIGHT + CAR_HEIGHT / 2: # Adjust as needed
+            image_filename = f"frame_{samples_generated:05d}.png" # e.g., frame_00000.png
+            image_filepath = os.path.join(IMAGES_SUBDIR, image_filename)
+            
+            # Save the image (convert normalized float array back to uint8 for Pillow)
+            img_to_save = Image.fromarray((camera_view_array * 255).astype(np.uint8), mode='L') # 'RGB' for colour img, L for grayscale
+            img_to_save.save(image_filepath)
 
-        # Append label to CSV
-        with open(labels_filepath, 'a') as f:
-            f.write(f"{image_filename},{steering_label}\n")
+            # Append label to CSV
+            with open(labels_filepath, 'a') as f:
+                f.write(f"{image_filename},{steering_label}\n")
 
-        samples_generated += 1
+            samples_generated += 1
 
-        # Display progress (optional)
-        if samples_generated % 100 == 0:
-            print(f"Generated {samples_generated}/{num_samples} samples.")
+            # Display progress (optional)
+            if samples_generated % 100 == 0:
+                print(f"Generated {samples_generated}/{num_samples} samples.")
+        else:
+            # If car is off screen, don't increment samples_generated
+            # We still need to run the simulation loop, but skip saving this frame
+            pass # print("Skipping off-screen frame") 
+
 
         # Update display for visualization
         pygame.display.flip()
