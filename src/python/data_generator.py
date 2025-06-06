@@ -3,20 +3,7 @@
 # lane scenarios, captures camera views, automatically 
 #determines ground truth labels (steering/offset), 
 # and saves this data.
-# --- DATA GENERATION CONFIGURATION NOTES ---
-# The current simulation parameters (e.g., random steering frequency/magnitude,
-# steering correction strength, and car X-position reset upon loop)
-# are tuned to reliably generate ~6400 images
-# where both lane lines (yellow and white dashed) remain consistently within
-# the camera's field of view.
-
-# If a significantly larger dataset (e.g., tens or hundreds of thousands of images)
-# is required, these parameters, particularly those controlling random steering
-# and car correction/boundary behavior, may need to be re-evaluated and adjusted
-# to maintain visual consistency across a longer simulation run without lines
-# disappearing or the car leaving the road.
-
-#-------------------------------------------------------
+#----------------------------------------------libraries
 # import components from simulator.py and other libraries.
 import pygame
 import numpy as np
@@ -33,6 +20,26 @@ from simulator import (
     Car, draw_road, draw_lane_lines, get_camera_view
 )
 
+# --- DATA GENERATION CONFIGURATION NOTES ---
+# The current simulation parameters (e.g., random steering frequency/magnitude,
+# steering correction strength, and car X-position reset upon loop)
+# are tuned to reliably generate ~6400 images
+# where both lane lines (yellow and white dashed) remain consistently within
+# the camera's field of view.
+
+# If a significantly larger dataset (e.g., tens or hundreds of thousands of images)
+# is required, these parameters, particularly those controlling random steering
+# and car correction/boundary behavior, may need to be re-evaluated and adjusted
+# to maintain visual consistency across a longer simulation run without lines
+# disappearing or the car leaving the road.
+# Consider modifying:
+# - NUM_SAMPLES: For overall dataset size.
+# - np.random.uniform parameters for random steering: To control deviation magnitude.
+# - np.random.rand() threshold for random steering: To control deviation frequency.
+# - car.steer() values in boundary/angle correction: To control correction strength.
+# - The X-position reset range at car loop: For horizontal diversity upon reset.
+# --- END CONFIGURATION NOTES ---
+#-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data" # To run the script from the root directory
 IMAGES_SUBDIR = "images"
