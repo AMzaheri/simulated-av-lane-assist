@@ -85,3 +85,18 @@ This dataset adds speed variation to the horizontally diversified data.
 * **Other parameters**: Boundary correction strength (`steer(4)`), angle correction (`steer(2)` with `95/85` thresholds), X-position reset on loop (`+/- 20px`), and logic to prevent empty road frames remain consistent.
 
 This dataset adds camera perspective variability, making the training data more comprehensive and applicable to a wider range of real-world conditions.
+
+#### `run_v5_CurveMovement`
+
+* **Purpose:** This run focuses on generating data for a **curved road scenario** specifically for a **left-hand turn**. It incorporates a refined automated driving logic to ensure the car follows the curve accurately and consistently.
+* **Road Type:** Curved (Left Turn: from 90 to 180 degrees relative to the curve center)
+* **Key Features/Improvements:**
+    * **Corrected Curved Road Following:** Implemented a pure pursuit-like controller to accurately guide the car along the defined arc, addressing previous issues with incorrect turning direction and off-road movement.
+    * **Arc-Specific Reset Logic:** The car now automatically resets to the beginning of the curved path (top of the arc) once it successfully completes the defined arc (reaches the 180-degree mark) or if it veers significantly off track. This ensures that all generated images contain relevant road data.
+    * **Automated Data Collection:** Configured to collect a large number of samples (e.g., 5000 images) suitable for training a machine learning model.
+* **Data Structure:**
+    * Images are saved in the `data/run_v5_CurveMovement/images/` subdirectory.
+    * Corresponding steering angles are recorded in `data/run_v5_CurveMovement/labels.csv`.
+* **Considerations:**
+    * The generated images contain black areas due to the rectangular camera view on a curved road. This is intentional and mimics real-world scenarios, promoting a more robust model that learns to focus on the road features.
+    * The `KP_ANGLE` and `KP_OFFSET` parameters were tuned for stable curve following. Further tuning might be required based on model performance.

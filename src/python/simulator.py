@@ -30,6 +30,21 @@ CAMERA_OFFSET_Y = -5 # How far in front of the car the camera is
 #CAMERA_Y_RELATIVE_TO_CAR_FRONT = -CAR_HEIGHT / 2 - CAMERA_OFFSET_Y
 CAMERA_Y_OFFSET_FROM_CAR_CENTER = -70
 
+# --- ADJUSTED FOR DEBUGGING VISIBILITY: TEST CURVE ---
+# This will draw a simple, small, visible arc roughly in the center of your screen.
+CURVE_RADIUS = 200 # A smaller, fixed radius for easy visibility
+CURVE_CENTER_X = SCREEN_WIDTH / 2 # Center the curve's bounding circle horizontally
+CURVE_CENTER_Y = SCREEN_HEIGHT / 2 # Center the curve's bounding circle vertically
+
+# This will draw a 90-degree arc from the top-left to the bottom-left of its bounding circle (a downward left turn).
+# It should be clearly visible near the center of your screen.
+CURVE_START_ANGLE_DEG = 90  # Start at the top of the circle
+CURVE_END_ANGLE_DEG = 180   # End at the left of the circle (clockwise arc)
+
+# Convert angles to radians for numpy/math functions if needed
+CURVE_START_ANGLE_RAD = np.radians(CURVE_START_ANGLE_DEG)
+CURVE_END_ANGLE_RAD = np.radians(CURVE_END_ANGLE_DEG)
+
 #-----------------------------------------------------Car clasee
 # This class will manage the car's position, orientation, and 
 #provide methods for movement and drawing.
@@ -39,6 +54,8 @@ class Car:
         self.y = y
         self.angle = angle # Angle in degrees, 0=right, 90=up, 180=left, 270=down
         self.speed = CAR_SPEED
+        # Allow camera offset to be adjusted per car (for diversification)
+        self.camera_offset_y = CAMERA_Y_OFFSET_FROM_CAR_CENTER
 
     def move(self):
         # Convert angle to radians for trigonometric functions
@@ -50,6 +67,18 @@ class Car:
         self.angle += direction * CAR_STEERING_SPEED
         # Keep angle within 0-360 degrees
         self.angle %= 360
+   
+    # --- Steering in a curved road ---
+    def steer_curved_road(self, angle_change_deg):
+        """
+        Directly applies an angle change to the car's heading.
+        Positive angle_change_deg makes the car turn counter-clockwise (left).
+        Negative angle_change_deg makes the car turn clockwise (right).
+        """
+        self.angle += angle_change_deg
+        # Keep angle within 0-359 degrees
+        self.angle %= 360
+
 
     def draw(self, screen):
         # Rotate car image/rectangle
@@ -82,6 +111,48 @@ def draw_lane_lines(screen):
 
     # Center Dashed Line (Optional, for 2-way traffic)
     #pygame.draw.rect(screen, WHITE, (road_center_x - LANE_LINE_WIDTH / 2, 0, LANE_LINE_WIDTH, SCREEN_HEIGHT))
+
+#------------------------------------------------Curved Road Drawing Functions
+
+def draw_curved_road(screen, center_x, center_y, radius, start_angle_deg, end_angle_deg, road_width):
+    """Draws a curved road segment using thick arcs."""
+    # Calculate inner and outer radii for the road surface
+    inner_radius = radius - road_width / 2
+    outer_radius = radius + road_width / 2
+
+    # Draw the outer edge of the road
+    pygame.draw.arc(screen, GRAY,
+                    (center_x - outer_radius, center_y - outer_radius, 2 * outer_radius, 2 * outer_radius),
+                    np.radians(start_angle_deg), np.radians(end_angle_deg), int(road_width)) # draw as a thick arc
+
+
+def draw_curved_lane_lines(screen, center_x, center_y, radius, start_angle_deg, end_angle_deg, lane_width, lane_line_width):
+    """Draws curved lane lines (yellow solid and white dashed)."""
+    
+    # Yellow solid line (inner lane marker for a right turn)
+    yellow_line_radius = radius - lane_width / 2
+    pygame.draw.arc(screen, YELLOW,
+                    (center_x - yellow_line_radius, center_y - yellow_line_radius, 2 * yellow_line_radius, 2 * yellow_line_radius),
+                    np.radians(start_angle_deg), np.radians(end_angle_deg), int(lane_line_width))
+
+    # White dashed line (outer lane marker for a right turn)
+    white_line_radius = radius + lane_width / 2
+    
+    # For dashed lines on an arc, we'll draw multiple small arcs
+    # Define step size for dashes (in degrees)
+    dash_step_deg = 5 # Adjust for longer/shorter dashes
+    gap_step_deg = 5 # Adjust for longer/shorter gaps
+
+    current_angle_deg = start_angle_deg
+    while current_angle_deg < end_angle_deg:
+        # Draw a dash
+        dash_end_angle_deg = min(current_angle_deg + dash_step_deg, end_angle_deg)
+        pygame.draw.arc(screen, WHITE,
+                        (center_x - white_line_radius, center_y - white_line_radius, 2 * white_line_radius, 2 * white_line_radius),
+                        np.radians(current_angle_deg), np.radians(dash_end_angle_deg), int(lane_line_width))
+        
+        # Move to the start of the next dash (skipping the gap)
+        current_angle_deg += dash_step_deg + gap_step_deg
 
 #------------------------------------------------ Camera View Capture
 def get_camera_view(screen, car):
