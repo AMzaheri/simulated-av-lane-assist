@@ -100,3 +100,24 @@ This dataset adds camera perspective variability, making the training data more 
 * **Considerations:**
     * The generated images contain black areas due to the rectangular camera view on a curved road. This is intentional and mimics real-world scenarios, promoting a more robust model that learns to focus on the road features.
     * The `KP_ANGLE` and `KP_OFFSET` parameters were tuned for stable curve following. Further tuning might be required based on model performance.
+
+
+#### `run_v6_DiversifiedCurvedMovement`
+
+* **Purpose:** This run builds upon the previous curved road data generation by introducing significant diversification to enhance the robustness and generalisation capabilities of the trained machine learning model.
+* **Road Type:** Curved (Left Turn: from 90 to 180 degrees relative to the curve center)
+* **Key Features/Improvements:**
+    * **Dynamic Target Lateral Offset:**
+        * Introduced a `target_lateral_offset` variable that periodically changes, making the car intentionally drive slightly off the lane center.
+        * The `steering_label` calculation now incorporates this offset (`effective_offset_error`), training the model to handle and correct for varying lateral positions within the lane.
+        * Parameters like `offset_change_timer` and `OFFSET_CHANGE_INTERVAL` control the frequency of these target offset changes.
+    * **Randomised Reset Position and Angle:**
+        * When the car resets to the start of the curved path, its initial `x` position and `angle` are now randomly perturbed using `reset_lateral_offset` and `reset_angle_deviation`.
+        * This ensures the car starts each segment from slightly different initial conditions, forcing the controller (and model) to adapt and correct immediately.
+    * **Automated Data Collection:** Configured to collect a large number of samples (e.g., 5000 images) suitable for training a machine learning model.
+* **Data Structure:**
+    * Images are saved in the `data/run_v6_DiversifiedCurvedMovement/images/` subdirectory.
+    * Corresponding steering angles are recorded in `data/run_v6_DiversifiedCurvedMovement/labels.csv`.
+* **Considerations:**
+    * The generated images continue to contain some black areas outside the road and minor rendering artifacts on the road surface. These are considered beneficial for model robustness, mimicking real-world visual variations.
+    * The `KP_ANGLE` and `KP_OFFSET` parameters, along with the new diversification parameters, can be further tuned based on model performance.
