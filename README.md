@@ -121,3 +121,11 @@ This dataset adds camera perspective variability, making the training data more 
 * **Considerations:**
     * The generated images continue to contain some black areas outside the road and minor rendering artifacts on the road surface. These are considered beneficial for model robustness, mimicking real-world visual variations.
     * The `KP_ANGLE` and `KP_OFFSET` parameters, along with the new diversification parameters, can be further tuned based on model performance.
+
+#### Run `run_v7_DiversifiedCurvedMovement_v01`
+
+Most parameters are similiar to  as run `run_v7_DiversifiedCurvedMovement`. Adjusted `target_lateral_offset` range (in `generate_data`):
+
+`np.random.uniform(-LANE_WIDTH / 2, LANE_WIDTH / 2)`. I decreased the `LANE_WIDTH / 3` value to make the car wander less aggressively from the lane center. A larger range means more diverse lateral positions.
+
+
