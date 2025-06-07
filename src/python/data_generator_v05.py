@@ -25,8 +25,8 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement" # Updated run name for diversification
-NUM_SAMPLES = 5000 
+CURRENT_RUN_NAME = "run_v6_CorrectedCurveMovement" # Changed run name
+NUM_SAMPLES = 5000 # Increased samples
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
 IMAGES_SUBDIR = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "images")
@@ -48,14 +48,6 @@ def generate_data(screen, clock, car, num_samples, road_type):
         f.write("image_filename,steering_angle\n")
 
     samples_generated = 0
-
-    # --- Diversification Variables for Curved Road ---
-    # These variables control the car's target offset from the lane center.
-    target_lateral_offset = 0 # Initial target offset (pixels, positive = right of center)
-    offset_change_timer = 0
-    # Change target offset every X seconds (FPS * seconds)
-    OFFSET_CHANGE_INTERVAL = FPS * 3 # Change target offset every 3 seconds
-
     while samples_generated < num_samples:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -107,14 +99,6 @@ def generate_data(screen, clock, car, num_samples, road_type):
         elif road_type == "curved":
             # --- CURVED ROAD LOGIC: Pure Pursuit-like Controller ---
 
-            # Update target_lateral_offset periodically
-            offset_change_timer += 1
-            if offset_change_timer >= OFFSET_CHANGE_INTERVAL:
-                # Randomly choose a target offset within the lane boundaries
-                # e.g., max 1/3 of the lane width from center to either side
-                target_lateral_offset = np.random.uniform(-LANE_WIDTH / 3, LANE_WIDTH / 3) 
-                offset_change_timer = 0
-
             # 1. Calculate car's position relative to the curve's center (for math coordinates)
             car_rel_x = car.x - CURVE_CENTER_X
             car_rel_y_math = -(car.y - CURVE_CENTER_Y) # Flip y-axis for standard math angles (y increases upwards)
@@ -132,24 +116,22 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
             # 4. Calculate the required heading angle for the car to point towards the target
             dx = target_x - car.x
-            dy_for_arctan2 = car.y - target_y 
+            dy_for_arctan2 = car.y - target_y # This is the crucial change: current_y - target_y for correct angle mapping
 
             angle_to_target_deg = np.degrees(np.arctan2(dy_for_arctan2, dx))
+            # Normalize to 0-360 range
             angle_to_target_deg = (angle_to_target_deg + 360) % 360
 
             # 5. Calculate the difference between current car angle and desired angle
             angle_error = angle_to_target_deg - car.angle
+            # Normalize angle error to -180 to 180 degrees for smoother steering
             angle_error = (angle_error + 180) % 360 - 180
 
             # 6. Calculate perpendicular distance from car to ideal curve (for offset correction)
             offset_from_ideal_radius = np.sqrt(car_rel_x**2 + car_rel_y_math**2) - CURVE_RADIUS
 
-            # Incorporate target_lateral_offset into the offset error calculation
-            # The controller tries to minimize (offset_from_ideal_radius - target_lateral_offset)
-            effective_offset_error = offset_from_ideal_radius - target_lateral_offset
-
-            # 7. Determine steering label (combining angle error and effective offset error)
-            steering_label = angle_error * KP_ANGLE - effective_offset_error * KP_OFFSET
+            # 7. Determine steering label (combining angle error and offset error)
+            steering_label = angle_error * KP_ANGLE - offset_from_ideal_radius * KP_OFFSET
             
             # Add a small random component for diversity
             if np.random.rand() < 0.05: # 5% chance of random deviation per frame
@@ -160,9 +142,8 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
             # --- Environment Reset for Curved Road ---
             # Calculate current polar angle relative to the curve's center in degrees (0-360 range)
-            car_rel_x_reset = car.x - CURVE_CENTER_X
-            car_rel_y_math_reset = -(car.y - CURVE_CENTER_Y) # Flipped Y for math angles
-            current_polar_angle_rad_for_reset = np.arctan2(car_rel_y_math_reset, car_rel_x_reset)
+            # This is recalculated here to ensure it's up-to-date after car movement for reset logic.
+            current_polar_angle_rad_for_reset = np.arctan2(car_rel_y_math, car_rel_x)
             current_polar_angle_deg_normalized = (np.degrees(current_polar_angle_rad_for_reset) + 360) % 360
 
             # Reset if car has reached or passed the end of the defined arc (CURVE_END_ANGLE_DEG)
@@ -172,32 +153,16 @@ def generate_data(screen, clock, car, num_samples, road_type):
                car.y > CURVE_CENTER_Y + ROAD_WIDTH/2 + CAR_HEIGHT/2 or \
                np.sqrt(car_rel_x**2 + car_rel_y_math**2) > CURVE_RADIUS + ROAD_WIDTH/2 + CAR_WIDTH:
                 
-                # --- Randomize Reset Position and Angle for Diversification ---
-                ideal_reset_x = CURVE_CENTER_X
-                ideal_reset_y = CURVE_CENTER_Y - CURVE_RADIUS
-                ideal_reset_angle = 90
-
-                # Add random perturbations (lateral offset and angle deviation)
-                # Max lateral offset should be less than half lane width to keep it on road.
-                reset_lateral_offset = np.random.uniform(-LANE_WIDTH / 2.5, LANE_WIDTH / 2.5) 
-                reset_angle_deviation = np.random.uniform(-7, 7) # +/- 7 degrees
-
-                # Apply offset perpendicular to the initial heading (angle 90 is up, so lateral is along X)
-                car.x = ideal_reset_x + reset_lateral_offset
-                car.y = ideal_reset_y 
-                car.angle = ideal_reset_angle + reset_angle_deviation
-
+                car.x = CURVE_CENTER_X
+                car.y = CURVE_CENTER_Y - CURVE_RADIUS
+                car.angle = 90 # Start pointing up
                 car.camera_offset_y = CAMERA_Y_OFFSET_FROM_CAR_CENTER # Reset camera offset
-                
-                # Reset offset change timer and target offset for the new segment
-                offset_change_timer = 0 
-                target_lateral_offset = 0 # Start new segment centered
-            
+
             # Debugging print statements (optional, uncomment to see real-time values)
             # print(f"Car: ({car.x:.1f}, {car.y:.1f}) Angle: {car.angle:.1f} Label: {steering_label:.2f}")
-            # print(f"Polar Ang (math): {np.degrees(current_polar_angle_rad):.1f}, Target Ang (math): {np.degrees(target_polar_angle_rad):.1f}")
+            # print(f"Polar Ang (math): {np.degrees(current_polar_angle_rad_for_reset):.1f}, Target Ang (math): {np.degrees(target_polar_angle_rad):.1f}")
             # print(f"Target Pygame: ({target_x:.1f}, {target_y:.1f})")
-            # print(f"dx: {dx:.1f}, dy_for_arctan2: {dy_for_arctan2:.1f}, Angle to Target (Pygame): {angle_to_target_deg:.1f}, Angle Error: {angle_error:.1f}, Offset: {offset_from_ideal_radius:.1f}, Effective Offset: {effective_offset_error:.1f}")
+            # print(f"dx: {dx:.1f}, dy_for_arctan2: {dy_for_arctan2:.1f}, Angle to Target (Pygame): {angle_to_target_deg:.1f}, Angle Error: {angle_error:.1f}, Offset: {offset_from_ideal_radius:.1f}")
 
         # Always move the car after determining its steering
         car.move()
