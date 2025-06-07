@@ -25,7 +25,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v6_CorrectedCurveMovement" # Changed run name
+CURRENT_RUN_NAME = "run_v5_CurvedRoad_Movement" #"run_v6_CorrectedCurveMovement" # Changed run name
 NUM_SAMPLES = 5000 # Increased samples
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
@@ -100,6 +100,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
             # --- CURVED ROAD LOGIC: Pure Pursuit-like Controller ---
 
             # 1. Calculate car's position relative to the curve's center (for math coordinates)
+            # This 'car_rel_y_math' is used for polar angle calculation relative to curve center.
             car_rel_x = car.x - CURVE_CENTER_X
             car_rel_y_math = -(car.y - CURVE_CENTER_Y) # Flip y-axis for standard math angles (y increases upwards)
 
@@ -108,6 +109,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
             # 3. Calculate the ideal target point on the curve (look-ahead point)
             angular_step_rad = LOOK_AHEAD_DISTANCE / CURVE_RADIUS
+            # For this left turn curve (90 to 180 degrees math, CCW), the angle should increase.
             target_polar_angle_rad = current_polar_angle_rad + angular_step_rad 
 
             # Calculate the target (x, y) coordinates on the ideal curve (Pygame coordinates)
@@ -115,8 +117,11 @@ def generate_data(screen, clock, car, num_samples, road_type):
             target_y = CURVE_CENTER_Y - CURVE_RADIUS * np.sin(target_polar_angle_rad) # Flip y-axis back for Pygame display
 
             # 4. Calculate the required heading angle for the car to point towards the target
+            # IMPORTANT: For np.arctan2, we need dy to be positive for 'up' movement (smaller Y in Pygame)
+            # and negative for 'down' movement (larger Y in Pygame).
+            # This aligns with how `car.move()` uses `np.sin`.
             dx = target_x - car.x
-            dy_for_arctan2 = car.y - target_y # This is the crucial change: current_y - target_y for correct angle mapping
+            dy_for_arctan2 = car.y - target_y # This is the crucial change: current_y - target_y
 
             angle_to_target_deg = np.degrees(np.arctan2(dy_for_arctan2, dx))
             # Normalize to 0-360 range
@@ -131,6 +136,9 @@ def generate_data(screen, clock, car, num_samples, road_type):
             offset_from_ideal_radius = np.sqrt(car_rel_x**2 + car_rel_y_math**2) - CURVE_RADIUS
 
             # 7. Determine steering label (combining angle error and offset error)
+            # Positive steering_label means turning counter-clockwise (left).
+            # If angle_error is positive, car needs to turn left.
+            # If offset_from_ideal_radius is positive (car too far from center of ideal radius), car needs to turn right (negative steering_label).
             steering_label = angle_error * KP_ANGLE - offset_from_ideal_radius * KP_OFFSET
             
             # Add a small random component for diversity
@@ -141,16 +149,9 @@ def generate_data(screen, clock, car, num_samples, road_type):
             car.steer_curved_road(steering_label)
 
             # --- Environment Reset for Curved Road ---
-            # Calculate current polar angle relative to the curve's center in degrees (0-360 range)
-            # This is recalculated here to ensure it's up-to-date after car movement for reset logic.
-            current_polar_angle_rad_for_reset = np.arctan2(car_rel_y_math, car_rel_x)
-            current_polar_angle_deg_normalized = (np.degrees(current_polar_angle_rad_for_reset) + 360) % 360
-
-            # Reset if car has reached or passed the end of the defined arc (CURVE_END_ANGLE_DEG)
-            # OR if it goes significantly off track in other directions.
-            if current_polar_angle_deg_normalized >= CURVE_END_ANGLE_DEG or \
-               car.x < CURVE_CENTER_X - CURVE_RADIUS - ROAD_WIDTH/2 - CAR_WIDTH/2 or \
-               car.y > CURVE_CENTER_Y + ROAD_WIDTH/2 + CAR_HEIGHT/2 or \
+            # Reset if car goes too far off the curved road boundaries or completes the arc
+            if car.x < CURVE_CENTER_X - CURVE_RADIUS - ROAD_WIDTH/2 or \
+               car.y > CURVE_CENTER_Y + ROAD_WIDTH/2 + CAR_HEIGHT or \
                np.sqrt(car_rel_x**2 + car_rel_y_math**2) > CURVE_RADIUS + ROAD_WIDTH/2 + CAR_WIDTH:
                 
                 car.x = CURVE_CENTER_X
@@ -160,7 +161,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
             # Debugging print statements (optional, uncomment to see real-time values)
             # print(f"Car: ({car.x:.1f}, {car.y:.1f}) Angle: {car.angle:.1f} Label: {steering_label:.2f}")
-            # print(f"Polar Ang (math): {np.degrees(current_polar_angle_rad_for_reset):.1f}, Target Ang (math): {np.degrees(target_polar_angle_rad):.1f}")
+            # print(f"Polar Ang (math): {np.degrees(current_polar_angle_rad):.1f}, Target Ang (math): {np.degrees(target_polar_angle_rad):.1f}")
             # print(f"Target Pygame: ({target_x:.1f}, {target_y:.1f})")
             # print(f"dx: {dx:.1f}, dy_for_arctan2: {dy_for_arctan2:.1f}, Angle to Target (Pygame): {angle_to_target_deg:.1f}, Angle Error: {angle_error:.1f}, Offset: {offset_from_ideal_radius:.1f}")
 
@@ -188,8 +189,8 @@ def generate_data(screen, clock, car, num_samples, road_type):
         camera_view_array, camera_rect = get_camera_view(screen, car)
 
         # Only save if car is somewhat on screen (prevents saving black screens when car is off-track)
-        if car.x >= -CAR_WIDTH/2 and car.x <= SCREEN_WIDTH + CAR_WIDTH/2 and \
-           car.y >= -CAR_HEIGHT/2 and car.y <= SCREEN_HEIGHT + CAR_HEIGHT/2:
+        if car.x >= -CAR_WIDTH and car.x <= SCREEN_WIDTH + CAR_WIDTH and \
+           car.y >= -CAR_HEIGHT and car.y <= SCREEN_HEIGHT + CAR_HEIGHT:
             image_filename = f"frame_{samples_generated:05d}.png"
             image_filepath = os.path.join(IMAGES_SUBDIR, image_filename)
             img_to_save = Image.fromarray((camera_view_array * 255).astype(np.uint8), mode='L')
