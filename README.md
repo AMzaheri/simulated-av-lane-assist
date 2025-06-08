@@ -156,6 +156,12 @@ This dataset adds camera perspective variability, making the training data more 
   * ` = np.random.uniform(-4, 4)`
   * ` = np.random.uniform(-10, 10)`
   * ` = np.random.uniform(-20, 20)`
+ * This parameter controls how much the car's starting angle deviates from the perfect tangent after a reset. A larger range forces the model to handle more significant initial yaw errors.
  * Other parameters: similar to `run_v7_DiversifiedCurvedMovement_v05`
  
+#### Run `run_v7_DiversifiedCurvedMovement_v09`
+
+ * Widened car speed variation `min_speed = CAR_SPEED * 0.7, max_speed = CAR_SPEED * 1.3`
+ * Other parameters: similar to `run_v7_DiversifiedCurvedMovement_v08`
+
 
