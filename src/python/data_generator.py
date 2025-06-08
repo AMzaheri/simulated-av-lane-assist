@@ -25,7 +25,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v08" # Updated run name for diversification
+CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v09" # Updated run name for diversification
 NUM_SAMPLES = 500 
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
@@ -63,8 +63,8 @@ def generate_data(screen, clock, car, num_samples, road_type):
                 return
 
         # --- Update Car Position (Random speed variation can apply to both) ---
-        min_speed = CAR_SPEED * 0.8
-        max_speed = CAR_SPEED * 1.2
+        min_speed = CAR_SPEED * 0.7 # 0.8
+        max_speed = CAR_SPEED * 1.3 #1.2
         car.speed = np.random.uniform(min_speed, max_speed)
 
         # --- Automated Driving Logic & Environment Reset ---
