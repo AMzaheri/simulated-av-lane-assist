@@ -126,6 +126,10 @@ This dataset adds camera perspective variability, making the training data more 
 
 Most parameters are similiar to  as run `run_v7_DiversifiedCurvedMovement`. Adjusted `target_lateral_offset` range (in `generate_data`):
 
-`np.random.uniform(-LANE_WIDTH / 2, LANE_WIDTH / 2)`. I decreased the `LANE_WIDTH / 3` value to make the car wander less aggressively from the lane center. A larger range means more diverse lateral positions.
+`target_lateral_offset = np.random.uniform(-LANE_WIDTH / 2, LANE_WIDTH / 2)`. I increased the `LANE_WIDTH / 3` value to make the car wander less aggressively from the lane center. A larger range means more diverse lateral positions.
 
+
+#### Run `run_v7_DiversifiedCurvedMovement_v02`
+
+Similar to `run_v7_DiversifiedCurvedMovement_v01` with `target_lateral_offset = np.random.uniform(-LANE_WIDTH, LANE_WIDTH)`
 

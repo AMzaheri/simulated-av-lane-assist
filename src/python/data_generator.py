@@ -25,7 +25,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v01" # Updated run name for diversification
+CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v02" # Updated run name for diversification
 NUM_SAMPLES = 500 
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
@@ -112,7 +112,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
             if offset_change_timer >= OFFSET_CHANGE_INTERVAL:
                 # Randomly choose a target offset within the lane boundaries
                 # e.g., max 1/3 of the lane width from center to either side
-                target_lateral_offset = np.random.uniform(-LANE_WIDTH / 2, LANE_WIDTH / 2) 
+                target_lateral_offset = np.random.uniform(-LANE_WIDTH, LANE_WIDTH) 
                 offset_change_timer = 0
 
             # 1. Calculate car's position relative to the curve's center (for math coordinates)
