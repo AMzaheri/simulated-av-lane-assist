@@ -25,7 +25,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v09" # Updated run name for diversification
+CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v10" # Updated run name for diversification
 NUM_SAMPLES = 500 
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
@@ -153,7 +153,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
             
             # Add a small random component for diversity
             if np.random.rand() < 0.05: # 5% chance of random deviation per frame
-                steering_label += np.random.uniform(-0.5, 0.5) # Adjust magnitude as needed
+                steering_label += np.random.uniform(-0.6, 0.6) # Adjust magnitude as needed
 
             # Apply steering to the car
             car.steer_curved_road(steering_label)
