@@ -25,7 +25,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v05" # Updated run name for diversification
+CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v08" # Updated run name for diversification
 NUM_SAMPLES = 500 
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
@@ -180,7 +180,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
                 # Add random perturbations (lateral offset and angle deviation)
                 # Max lateral offset should be less than half lane width to keep it on road.
                 reset_lateral_offset = np.random.uniform(-LANE_WIDTH / 2.05, LANE_WIDTH / 2.05) 
-                reset_angle_deviation = np.random.uniform(-7, 7) # +/- 7 degrees
+                reset_angle_deviation = np.random.uniform(-20, 20) # +/- 7 degrees
 
                 # Apply offset perpendicular to the initial heading (angle 90 is up, so lateral is along X)
                 car.x = ideal_reset_x + reset_lateral_offset
