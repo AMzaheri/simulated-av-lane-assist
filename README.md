@@ -165,3 +165,10 @@ This dataset adds camera perspective variability, making the training data more 
  * Other parameters: similar to `run_v7_DiversifiedCurvedMovement_v08`
 
 
+#### Run `run_v7_DiversifiedCurvedMovement_v10`
+
+ * Adjusted random steering component. A larger range will create more unpredictable, human-like driving data.
+  * Used `steering_label += np.random.uniform(-0.6, 0.6)`
+
+
+  
