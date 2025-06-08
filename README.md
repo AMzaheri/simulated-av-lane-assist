@@ -133,3 +133,9 @@ Most parameters are similiar to  as run `run_v7_DiversifiedCurvedMovement`. Adju
 
 Similar to `run_v7_DiversifiedCurvedMovement_v01` with `target_lateral_offset = np.random.uniform(-LANE_WIDTH, LANE_WIDTH)`
 
+ 
+#### Run `run_v7_DiversifiedCurvedMovement_v03`
+
+ -`OFFSET_CHANGE_INTERVAL` set to `FPS * 1`. Other parameters are similar to `run_v7_DiversifiedCurvedMovement_v02`.
+ - FPS * 3: This controls how frequently the target_lateral_offset changes. Decreasing this value (e.g., FPS * 1 for every 1 second) will make the car's lateral target change more often, leading to more frequent corrections and greater diversity in the car's path. Increasing it will make the car follow a specific offset for longer.
+ 

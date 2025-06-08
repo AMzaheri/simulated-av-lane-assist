@@ -25,7 +25,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v02" # Updated run name for diversification
+CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v03" # Updated run name for diversification
 NUM_SAMPLES = 500 
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
@@ -54,7 +54,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
     target_lateral_offset = 0 # Initial target offset (pixels, positive = right of center)
     offset_change_timer = 0
     # Change target offset every X seconds (FPS * seconds)
-    OFFSET_CHANGE_INTERVAL = FPS * 3 # Change target offset every 3 seconds
+    OFFSET_CHANGE_INTERVAL = FPS * 1 #3 # Change target offset every 3 seconds
 
     while samples_generated < num_samples:
         for event in pygame.event.get():
