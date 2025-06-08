@@ -124,18 +124,30 @@ This dataset adds camera perspective variability, making the training data more 
 
 #### Run `run_v7_DiversifiedCurvedMovement_v01`
 
-Most parameters are similiar to  as run `run_v7_DiversifiedCurvedMovement`. Adjusted `target_lateral_offset` range (in `generate_data`):
+ * Most parameters are similiar to  as run `run_v7_DiversifiedCurvedMovement`. Adjusted `target_lateral_offset` range (in `generate_data`):
 
-`target_lateral_offset = np.random.uniform(-LANE_WIDTH / 2, LANE_WIDTH / 2)`. I increased the `LANE_WIDTH / 3` value to make the car wander less aggressively from the lane center. A larger range means more diverse lateral positions.
+` * target_lateral_offset = np.random.uniform(-LANE_WIDTH / 2, LANE_WIDTH / 2)`. I increased the `LANE_WIDTH / 3` value to make the car wander less aggressively from the lane center. A larger range means more diverse lateral positions.
 
 
 #### Run `run_v7_DiversifiedCurvedMovement_v02`
 
-Similar to `run_v7_DiversifiedCurvedMovement_v01` with `target_lateral_offset = np.random.uniform(-LANE_WIDTH, LANE_WIDTH)`
+ * Similar to `run_v7_DiversifiedCurvedMovement_v01` with `target_lateral_offset = np.random.uniform(-LANE_WIDTH, LANE_WIDTH)`
 
  
 #### Run `run_v7_DiversifiedCurvedMovement_v03`
 
- -`OFFSET_CHANGE_INTERVAL` set to `FPS * 1`. Other parameters are similar to `run_v7_DiversifiedCurvedMovement_v02`.
- - FPS * 3: This controls how frequently the target_lateral_offset changes. Decreasing this value (e.g., FPS * 1 for every 1 second) will make the car's lateral target change more often, leading to more frequent corrections and greater diversity in the car's path. Increasing it will make the car follow a specific offset for longer.
+ * `OFFSET_CHANGE_INTERVAL` set to `FPS * 1`. Other parameters are similar to `run_v7_DiversifiedCurvedMovement_v02`.
+ * FPS * 3: This controls how frequently the target_lateral_offset changes. Decreasing this value (e.g., FPS * 1 for every 1 second) will make the car's lateral target change more often, leading to more frequent corrections and greater diversity in the car's path. Increasing it will make the car follow a specific offset for longer.
  
+
+#### Run `run_v7_DiversifiedCurvedMovement_v04`
+
+ * Changed `reset_lateral_offset` range to `np.random.uniform(-LANE_WIDTH / 2.25, LANE_WIDTH / 2.25)`. This parameter controls how far off-center the car starts after a reset. A larger range makes the initial correction task more challenging.
+ * Other parameters similar to thoes in `run_v7_DiversifiedCurvedMovement_v03`
+
+#### Run `run_v7_DiversifiedCurvedMovement_v05`
+
+ * Changed `reset_lateral_offset` range to `np.random.uniform(-LANE_WIDTH / 2.05, LANE_WIDTH / 2.05)`.
+ * Other parameters similar to thoes in `run_v7_DiversifiedCurvedMovement_v03`.
+
+
