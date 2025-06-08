@@ -25,7 +25,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v10" # Updated run name for diversification
+CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v13" # Updated run name for diversification
 NUM_SAMPLES = 500 
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
@@ -152,7 +152,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
             steering_label = angle_error * KP_ANGLE - effective_offset_error * KP_OFFSET
             
             # Add a small random component for diversity
-            if np.random.rand() < 0.05: # 5% chance of random deviation per frame
+            if np.random.rand() < 0.1: #0.05: # 5% chance of random deviation per frame
                 steering_label += np.random.uniform(-0.6, 0.6) # Adjust magnitude as needed
 
             # Apply steering to the car
@@ -217,7 +217,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
         # --- Diversify Camera Position (Applies to both road types) ---
         base_camera_offset_y = CAMERA_Y_OFFSET_FROM_CAR_CENTER
-        car.camera_offset_y = base_camera_offset_y + np.random.uniform(-10, 10)
+        car.camera_offset_y = base_camera_offset_y + np.random.uniform(-100, 100) # -10, 10)
 
         # --- Capture Camera View & Determine Label (Steering label is set above) ---
         camera_view_array, camera_rect = get_camera_view(screen, car)
