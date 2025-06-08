@@ -185,6 +185,18 @@ This dataset adds camera perspective variability, making the training data more 
  * Adjusted Camera Perspective:camera vertical offset to
   * `car.camera_offset_y = base_camera_offset_y + np.random.uniform(-30, 30)`
   * `car.camera_offset_y = base_camera_offset_y + np.random.uniform(-100, 100)`
+  * This value controls how high or low the camera is positioned relative to the car's center. This simulates different vehicle suspensions or camera mounting points.
  * Other parameters: similar to `run_v7_DiversifiedCurvedMovement_v11`  
 
+#### Run `run_v7_DiversifiedCurvedMovement_v14`
 
+ * Chnaged control parameter, `LOOK_AHEAD_DISTANCE` to 120
+ * Note: Changing this can alter the "aggressiveness" of the car's turn. A larger look-ahead makes turns smoother but might result in wider turns; a smaller one makes turns sharper.
+ * Other parameter similar to `run_v7_DiversifiedCurvedMovement_v12` 
+
+#### Run `run_v7_DiversifiedCurvedMovement_v15'
+
+ * Tuned another contol parameter (`KP_ANGLE`)
+ * `KP_ANGLE and KP_OFFSET: (0.6 and 0.05 respectively)`
+ * Note: These proportional gains determine how strongly the car corrects for angle and offset errors. Varying these slightly can produce data where the car corrects more slowly/quickly, leading to different steering angle distributions. Be careful, as large changes here can make the controller unstable and cause the car to drive off the road.
+ * Other parameters: similar to `run_v7_DiversifiedCurvedMovement_v12`
