@@ -150,4 +150,12 @@ This dataset adds camera perspective variability, making the training data more 
  * Changed `reset_lateral_offset` range to `np.random.uniform(-LANE_WIDTH / 2.05, LANE_WIDTH / 2.05)`.
  * Other parameters similar to thoes in `run_v7_DiversifiedCurvedMovement_v03`.
 
+#### Run `run_v7_DiversifiedCurvedMovement_v06 to run_v7_DiversifiedCurvedMovement_v08`
+
+ * Adjusted `reset_angle_deviation` range to
+  * ` = np.random.uniform(-4, 4)`
+  * ` = np.random.uniform(-10, 10)`
+  * ` = np.random.uniform(-20, 20)`
+ * Other parameters: similar to `run_v7_DiversifiedCurvedMovement_v05`
+ 
 
