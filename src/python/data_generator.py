@@ -6,7 +6,7 @@ from PIL import Image
 
 # --- Curve Following Constants ---
 LOOK_AHEAD_DISTANCE = 100 # How far ahead (in pixels) the car "looks" on the curve
-KP_ANGLE = 0.5            # Proportional gain for angle error (tune this!)
+KP_ANGLE = 0.6            # Proportional gain for angle error (tune this!)
 KP_OFFSET = 0.05          # Proportional gain for offset error (tune this!)
 
 # Import simulator components (keep all these imports)
@@ -25,7 +25,7 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v13" # Updated run name for diversification
+CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v15" # Updated run name for diversification
 NUM_SAMPLES = 500 
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
