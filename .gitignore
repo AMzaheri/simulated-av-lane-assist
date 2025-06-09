@@ -214,7 +214,8 @@ install_manifest.txt
 CTestTestfile.cmake
 
 # data/
-
+data/all_images
+data/all_data
 data/*.png
 data/*.csv
 data/.DS_Store
