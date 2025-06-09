@@ -214,10 +214,13 @@ install_manifest.txt
 CTestTestfile.cmake
 
 # data/
-data/all_images
-data/all_data
+data/all_images/
+data/all_data/
 data/*.png
+data/*/images/ 
+
 data/*.csv
 data/.DS_Store
-# Mac
+
+# Mac files
 .DS_Store
