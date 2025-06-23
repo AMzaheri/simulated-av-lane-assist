@@ -224,3 +224,7 @@ data/.DS_Store
 
 # Mac files
 .DS_Store
+
+#python
+*.py[cod]
+*.ipynb_checkpoints
