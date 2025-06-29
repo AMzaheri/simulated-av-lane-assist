@@ -13,7 +13,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Set the path to the ONNX Runtime installation
 # IMPORTANT: Adjust this path to match your extracted folder name and exact location
 # Assuming 'third_party' is in the project root and CMakeLists.txt is in src/cpp/
-set(ONNXRUNTIME_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/onnxruntime-osx-arm64-1.22.0")
+set(ONNXRUNTIME_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/onnxruntime-osx-arm64-1.17.1")
 
 # Add ONNX Runtime include directories
 include_directories(
