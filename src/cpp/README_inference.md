@@ -4,7 +4,7 @@
 This project demonstrates how to perform neural network inference in a C++ console application using the ONNX Runtime library. It's configured to load and run an [NVIDIA PilotNet model] (https://www.kaggle.com/code/afsanehm/deep-learning-for-simulated-driving) for a lane-keeping task, taking dummy image data as input and predicting a steering angle.
 - This setup has been successfully tested on macOS (ARM64 architecture) using ONNX Runtime v1.17.1.
 
-### Project dtructur for this section
+### Project structur for this section
 
 ```
 simulated-av-lane-assist/
@@ -30,6 +30,7 @@ simulated-av-lane-assist/
 * **CMake:** Version 3.10 or higher.
 * **C++ Compiler:** A modern C++ compiler (e.g., AppleClang on macOS, GCC, MSVC) supporting C++17 standard.
 * **ONNX Runtime:** Specifically, **v1.17.1 for macOS ARM64**. Other versions or platforms may require adjustments.
+* **OpenCV:** A popular computer vision library. Installed via Homebrew on macOS. (required  for Real Image Data Inference)
 
 ## Setup Instructions
 
@@ -51,6 +52,16 @@ simulated-av-lane-assist/
     mkdir models
     mv /path/to/your/nvidia_pilotnet.onnx models/
     ```
+4.  **Install OpenCV:** (required  for Real Image Data Inference)
+    If you're on macOS, the easiest way to install OpenCV is using Homebrew:
+    ```bash
+    # Install Homebrew if you don't have it (skip if already installed)
+    /bin/bash -c "$(curl -fsSL [https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh))"
+
+    # Install OpenCV via Homebrew
+    brew install opencv
+    ```
+    For other operating systems, please refer to the [official OpenCV installation guide](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) or relevant package managers.
 
 ## Build Instructions
 
@@ -89,4 +100,10 @@ After a successful build, the executable `lane_keeping_inference` will be locate
     ```bash
     ./lane_keeping_inference
     ```
+
+## Inference using Real Image Data
+
+This section details the enhancements to the C++ inference module to process actual image data.
+
+---
 
