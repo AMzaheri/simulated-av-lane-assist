@@ -228,3 +228,6 @@ data/.DS_Store
 #python
 *.py[cod]
 *.ipynb_checkpoints
+
+# Ignore large third-party dependencies
+third_party/
