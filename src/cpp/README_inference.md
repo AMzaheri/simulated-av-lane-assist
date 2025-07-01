@@ -64,11 +64,11 @@ Ensure your ONNX model file (e.g., `nvidia_pilotnet.onnx`) is placed inside the 
  
 ## Build and Run
 
- 1. Navigate to the `build` directory:
+* Navigate to the `build` directory:
  ```bash
   cd /path/to/your/simulated-av-lane-assist/src/cpp/build
 ```
- 2. Run CMake to configure the project:
+*  Run CMake to configure the project:
 
   ```bash
    cmake ..
