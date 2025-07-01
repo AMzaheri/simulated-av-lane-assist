@@ -64,34 +64,41 @@ Ensure your ONNX model file (e.g., `nvidia_pilotnet.onnx`) is placed inside the 
  
 ## Build and Run
 
-* Navigate to the `build` directory:
- ```bash
-  cd /path/to/your/simulated-av-lane-assist/src/cpp/build
-```
-*  Run CMake to configure the project:
+### Build Instructions
 
-  ```bash
-   cmake ..
-  ```
-Ensure you see messages confirming ONNX Runtime and OpenCV were found.
+1.  **Navigate to the `build` directory:**
+    ```bash
+    cd /path/to/your/simulated-av-lane-assist/src/cpp/build
+    ```
+    (If `build` directory doesn't exist, create it: `mkdir build`)
 
-## Build the executables:
+2.  **Run CMake to configure the project:**
+    ```bash
+    cmake ..
+    ```
+    Ensure you see messages confirming ONNX Runtime and OpenCV were found.
+
+3.  **Build the executables:**
+    ```bash
+    make
+    ```
+    This will compile `inference_test.cpp` and `inference_real.cpp`, creating `lane_keeping_test_inference` and `lane_keeping_real_inference` executables (which will be placed in the `bin/` directory at your project root, as configured in `CMakeLists.txt`).
+
+### Running Dummy Input Inference
+
+This executable (`lane_keeping_test_inference`) uses a dummy, synthetic tensor as input to verify the ONNX Runtime setup and core model loading without image processing.
 
 ```bash
-   make
+/path/to/your/simulated-av-lane-assist/bin/lane_keeping_test_inference
 ```
-This will compile `inference_test.cpp` and `inference_real.cpp`, creating `lane_keeping_test_inference` and `lane_keeping_real_inference` executables inside `build/` directory or  in a `bin/` directory at the project root, as configured in `CMakeLists.txt`).
 
-## Running Dummy Input Inference
+### Running Real Image Inference
 
+ 
 This executable (`lane_keeping_real_inference`) loads and preprocesses `.png` images from the `data/test_images/` directory and performs inference on them.
 
 ```bash
 /path/to/your/simulated-av-lane-assist/bin/lane_keeping_real_inference
-or
-/path/to/your/simulated-av-lane-assist/src/cpp/build/lane_keeping_real_inference
 ```
 
 You should see output for each image processed, including its filename and the predicted steering angle. Different angles are expected for images representing straight vs. curved roads.
-
-
