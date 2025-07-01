@@ -115,8 +115,13 @@ int main() {
     const std::string test_images_dir_path = "../../../data/test_images/";
 
     // Check if the directory exists
-    if (!std::filesystem::exists(test_images_dir_path) || !std::filesystem::is_directory(test_images_dir_path)) {
-        std::cerr << "ERROR: Test images directory not found or is not a directory: " << test_images_dir_path << std::endl;
+    if (!std::filesystem::exists(test_images_dir_path)) {
+        std::cerr << "ERROR: Test images directory not found: ";
+        std::cerr << test_images_dir_path << std::endl;
+        return 1;
+    } else if (!std::filesystem::is_directory(test_images_dir_path)) {
+        std::cerr << "ERROR: The path is not a directory: ";
+        std::cerr << test_images_dir_path << std::endl;
         return 1;
     }
     std::cout << "Processing images from: " << test_images_dir_path << std::endl;
@@ -132,10 +137,13 @@ int main() {
         cv::Mat image = cv::imread(current_image_path, cv::IMREAD_COLOR);
 
         if (image.empty()) {
-            std::cerr << "ERROR: Could not load image from " << current_image_path << std::endl;
+            std::cerr << "ERROR: Could not load image from ";
+            std::cerr << current_image_path << std::endl;
             continue; // Skip to the next image
         }
-        std::cout << "Image loaded successfully: " << image.cols << "x" << image.rows << std::endl;
+
+        std::cout << "Image loaded successfully: ";
+        std::cout << image.cols << "x" << image.rows << std::endl;
 
         // Convert to grayscale
         cv::Mat gray_image;
@@ -153,14 +161,17 @@ int main() {
         std::cout << "Image normalized to [-1, 1] range." << std::endl;
 
         // Ensure the data is contiguous in memory.
+        // Ensure that float_image is a continuous matrix in memory, 
         if (!float_image.isContinuous()) {
             float_image = float_image.clone();
         }
 
         // Prepare the input tensor vector.
-        const size_t input_tensor_size = batch_size * input_channels * input_height * input_width;
+        const size_t input_tensor_size = batch_size * 
+                     input_channels * input_height * input_width;
         std::vector<float> input_tensor_values(input_tensor_size);
-        std::memcpy(input_tensor_values.data(), float_image.data, input_tensor_size * sizeof(float));
+        std::memcpy(input_tensor_values.data(), float_image.data, 
+                    input_tensor_size * sizeof(float));
         std::cout << "Image data copied to input tensor." << std::endl;
 
         std::vector<int64_t> input_shape = {
@@ -175,7 +186,10 @@ int main() {
             input_shape.data(),
             input_shape.size()
         );
-        assert(input_tensor.IsTensor() && input_tensor.GetTensorTypeAndShapeInfo().GetElementType() == ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT);
+        //assert(input_tensor.IsTensor() && input_tensor.GetTensorTypeAndShapeInfo().GetElementType() == ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT);
+        auto is_tensor = input_tensor.IsTensor();
+        auto element_type = input_tensor.GetTensorTypeAndShapeInfo().GetElementType();
+        assert(is_tensor && element_type == ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT);
         std::cout << "Input tensor created." << std::endl;
 
         // --- 9. Define Input and Output Names ---
@@ -200,13 +214,19 @@ int main() {
         Ort::TensorTypeAndShapeInfo output_tensor_info = output_tensor.GetTensorTypeAndShapeInfo();
         std::vector<int64_t> actual_output_shape = output_tensor_info.GetShape();
 
-        if (actual_output_shape.empty() || (actual_output_shape.size() == 2 && actual_output_shape[0] == 1 && actual_output_shape[1] == 1)) {
+        //if (actual_output_shape.empty() || (actual_output_shape.size() == 2 && actual_output_shape[0] == 1 && actual_output_shape[1] == 1)) {
+        bool is_empty = actual_output_shape.empty();
+        bool is_single_element_shape = (actual_output_shape.size() == 2) &&
+                                       (actual_output_shape[0] == 1) &&
+                                       (actual_output_shape[1] == 1);
+
+        if (is_empty || is_single_element_shape) {
             std::cout << "Predicted steering angle: " << output_data[0] << std::endl;
         } else {
             std::cout << "Unexpected output shape. Printing first element: " << output_data[0] << std::endl;
         }
     }
-}    
+    }    
   
     // --- End of main function ---
 
