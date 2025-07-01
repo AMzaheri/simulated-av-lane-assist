@@ -68,7 +68,7 @@ Ensure your ONNX model file (e.g., `nvidia_pilotnet.onnx`) is placed inside the 
 
 1.  **Navigate to the `build` directory:**
     ```bash
-    cd /path/to/your/simulated-av-lane-assist/src/cpp/build
+    cd /path/to/simulated-av-lane-assist/src/cpp/build
     ```
     (If `build` directory doesn't exist, create it: `mkdir build`)
 
@@ -82,14 +82,14 @@ Ensure your ONNX model file (e.g., `nvidia_pilotnet.onnx`) is placed inside the 
     ```bash
     make
     ```
-    This will compile `inference_test.cpp` and `inference_real.cpp`, creating `lane_keeping_test_inference` and `lane_keeping_real_inference` executables (which will be placed in the `bin/` directory at your project root, as configured in `CMakeLists.txt`).
+    This will compile `inference_test.cpp` and `inference_real.cpp`, creating `lane_keeping_test_inference` and `lane_keeping_real_inference` executables (which will be placed in the `bin/` directory at the project root, as configured in `CMakeLists.txt`).
 
 ### Running Dummy Input Inference
 
 This executable (`lane_keeping_test_inference`) uses a dummy, synthetic tensor as input to verify the ONNX Runtime setup and core model loading without image processing.
 
 ```bash
-/path/to/your/simulated-av-lane-assist/bin/lane_keeping_test_inference
+/path/to/simulated-av-lane-assist/bin/lane_keeping_test_inference
 ```
 
 ### Running Real Image Inference
@@ -98,7 +98,7 @@ This executable (`lane_keeping_test_inference`) uses a dummy, synthetic tensor a
 This executable (`lane_keeping_real_inference`) loads and preprocesses `.png` images from the `data/test_images/` directory and performs inference on them.
 
 ```bash
-/path/to/your/simulated-av-lane-assist/bin/lane_keeping_real_inference
+/path/to/simulated-av-lane-assist/bin/lane_keeping_real_inference
 ```
 
 You should see output for each image processed, including its filename and the predicted steering angle. Different angles are expected for images representing straight vs. curved roads.
