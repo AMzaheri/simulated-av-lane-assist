@@ -59,12 +59,12 @@ Ensure your ONNX model file (e.g., `nvidia_pilotnet.onnx`) is placed inside the 
 
 ### 4. Prepare Test Images (for Real Data Inference)
 
- * You can use 'src/python/data_generator.py' to create some images for straigth and curved roads scenarios.
- * The `./data/test_images.png` contains ywo images that I used to test the real inference.
-
+ * The `data/test_images/` directory contains two sample `.png` images, used for demonstrating the real image inference capabilities.
+ * Sample images, simulating straight and curved road conditions, can be created using the `src/python/data_generator.py` script.
+ 
 ## Build and Run
 
- 1. Navigate to the build directory:
+ 1. Navigate to the `build` directory:
  ```bash
   cd /path/to/your/simulated-av-lane-assist/src/cpp/build
 ```
@@ -84,10 +84,12 @@ This will compile `inference_test.cpp` and `inference_real.cpp`, creating `lane_
 
 ## Running Dummy Input Inference
 
-This executable (`lane_keeping_real_inference`) loads and preprocesses .png images from the `data/test_images/` directory and performs inference on them.
+This executable (`lane_keeping_real_inference`) loads and preprocesses `.png` images from the `data/test_images/` directory and performs inference on them.
 
 ```bash
 /path/to/your/simulated-av-lane-assist/bin/lane_keeping_real_inference
+or
+/path/to/your/simulated-av-lane-assist/src/cpp/build/lane_keeping_real_inference
 ```
 
 You should see output for each image processed, including its filename and the predicted steering angle. Different angles are expected for images representing straight vs. curved roads.

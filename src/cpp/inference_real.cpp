@@ -110,8 +110,8 @@ int main() {
     const int64_t input_channels = 1; // Grayscale
     const int64_t batch_size = 1;
 
-    // IMPORTANT: Define the path to your directory containing test images.
-    // This path is relative to where your executable runs (from 'src/cpp/build/').
+    // IMPORTANT: Define the path to directory containing test images.
+    // This path is relative to where executable runs (from 'src/cpp/build/').
     const std::string test_images_dir_path = "../../../data/test_images/";
 
     // Check if the directory exists
