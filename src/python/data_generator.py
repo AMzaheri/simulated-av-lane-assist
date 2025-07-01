@@ -6,8 +6,8 @@ from PIL import Image
 
 # --- Curve Following Constants ---
 LOOK_AHEAD_DISTANCE = 100 # How far ahead (in pixels) the car "looks" on the curve
-KP_ANGLE = 0.6            # Proportional gain for angle error (tune this!)
-KP_OFFSET = 0.05          # Proportional gain for offset error (tune this!)
+KP_ANGLE = 0.75 #0.6            # Proportional gain for angle error (tune this!)
+KP_OFFSET = 0.1 # 0.05          # Proportional gain for offset error (tune this!)
 
 # Import simulator components (keep all these imports)
 from simulator import (
@@ -25,8 +25,8 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "run_v7_DiversifiedCurvedMovement_v15" # Updated run name for diversification
-NUM_SAMPLES = 500 
+CURRENT_RUN_NAME = "data_real_inference" #run_v7_DiversifiedCurvedMovement_v15" # Updated run name for diversification
+NUM_SAMPLES = 50 
 ROAD_TYPE = "curved" # Set to "straight" or "curved" here
 
 IMAGES_SUBDIR = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "images")
@@ -179,8 +179,8 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
                 # Add random perturbations (lateral offset and angle deviation)
                 # Max lateral offset should be less than half lane width to keep it on road.
-                reset_lateral_offset = np.random.uniform(-LANE_WIDTH / 2.05, LANE_WIDTH / 2.05) 
-                reset_angle_deviation = np.random.uniform(-20, 20) # +/- 7 degrees
+                reset_lateral_offset = np.random.uniform(-LANE_WIDTH / 2.06, LANE_WIDTH / 2.06 ) # for inference test images #2.05, 2.05) 
+                reset_angle_deviation = np.random.uniform(-35, 35)  # for test images# -20, 20) # +/- 7 degrees
 
                 # Apply offset perpendicular to the initial heading (angle 90 is up, so lateral is along X)
                 car.x = ideal_reset_x + reset_lateral_offset
