@@ -10,6 +10,8 @@
 #include <opencv2/imgcodecs.hpp> // For cv::imread
 #include <opencv2/imgproc.hpp>   // For cv::cvtColor, cv::resize
 // #include <opencv2/highgui.hpp> // Optional: For displaying images, to debug visual output
+
+#include <filesystem> // For iterating through directories (C++17)
 // --------------------------------
 
 int main() {
@@ -100,126 +102,112 @@ int main() {
               << output_node_shapes[0][1] << "]"
               << std::endl;
 
-    // --- 7. Load and Preprocess Image for Input Tensor ---
+    // --- 7. Load and Preprocess Images for Input Tensor ---
 
-    // Define model input dimensions (ensure these match your model's expected input)
+    // Define model input dimensions
     const int64_t input_width = 200;
     const int64_t input_height = 66;
-    const int64_t input_channels = 1; // Assuming grayscale model input
+    const int64_t input_channels = 1; // Grayscale
     const int64_t batch_size = 1;
 
-    // IMPORTANT: Define the path to your test image.
-    // Place a test image (e.g., test_image.jpg) in your 'simulated-av-lane-assist/models/' directory.
-    // The path is relative to where your executable runs (from 'src/cpp/build/').
-    const std::string image_path = "../../../data/data_real_inference/images/frame_00028.png";
+    // IMPORTANT: Define the path to your directory containing test images.
+    // This path is relative to where your executable runs (from 'src/cpp/build/').
+    const std::string test_images_dir_path = "../../../data/test_images/";
 
-    // Load the image using OpenCV. cv::IMREAD_COLOR loads it as a 3-channel BGR image.
-    cv::Mat image = cv::imread(image_path, cv::IMREAD_COLOR);
-
-    if (image.empty()) {
-        std::cerr << "ERROR: Could not load image from " << image_path << std::endl;
-        return 1; // Exit the program if image not found
+    // Check if the directory exists
+    if (!std::filesystem::exists(test_images_dir_path) || !std::filesystem::is_directory(test_images_dir_path)) {
+        std::cerr << "ERROR: Test images directory not found or is not a directory: " << test_images_dir_path << std::endl;
+        return 1;
     }
-    std::cout << "Image loaded successfully: " << image.cols << "x" << image.rows << std::endl;
+    std::cout << "Processing images from: " << test_images_dir_path << std::endl;
 
-    // Convert to grayscale
-    cv::Mat gray_image;
-    cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
-    std::cout << "Converted to grayscale." << std::endl;
+    // Loop through all entries in the directory
+    for (const auto& entry : std::filesystem::directory_iterator(test_images_dir_path)) {
+        // Only process if it's a regular file and ends with .png
+        if (entry.is_regular_file() && entry.path().extension() == ".png") {
+            std::string current_image_path = entry.path().string();
+            std::cout << "\n--- Processing image: " << entry.path().filename() << " ---" << std::endl;
 
-    // Resize image to model's input dimensions (66x200)
-    cv::Mat resized_image;
-    cv::resize(gray_image, resized_image, cv::Size(input_width, input_height), 0, 0, cv::INTER_AREA);
-    std::cout << "Image resized to: " << resized_image.cols << "x" << resized_image.rows << std::endl;
+        // Load the image using OpenCV. cv::IMREAD_COLOR loads it as a 3-channel BGR image.
+        cv::Mat image = cv::imread(current_image_path, cv::IMREAD_COLOR);
 
-    // Normalize pixel values to range [-1, 1].
-    // This is common for PilotNet models, where 0-255 pixels are scaled.
-    // If your model expects 0-1 (divide by 255.0), adjust the scaling.
-    cv::Mat float_image;
-    resized_image.convertTo(float_image, CV_32FC1, 1.0 / 127.5, -1.0); // Scales 0-255 to [-1, 1]
-    std::cout << "Image normalized to [-1, 1] range." << std::endl;
+        if (image.empty()) {
+            std::cerr << "ERROR: Could not load image from " << current_image_path << std::endl;
+            continue; // Skip to the next image
+        }
+        std::cout << "Image loaded successfully: " << image.cols << "x" << image.rows << std::endl;
 
-    // Ensure the data is contiguous in memory.
-    // This is often needed when passing data from cv::Mat to other libraries.
-    if (!float_image.isContinuous()) {
-        float_image = float_image.clone();
+        // Convert to grayscale
+        cv::Mat gray_image;
+        cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
+        std::cout << "Converted to grayscale." << std::endl;
+
+        // Resize image to model's input dimensions (66x200)
+        cv::Mat resized_image;
+        cv::resize(gray_image, resized_image, cv::Size(input_width, input_height), 0, 0, cv::INTER_AREA);
+        std::cout << "Image resized to: " << resized_image.cols << "x" << resized_image.rows << std::endl;
+
+        // Normalize pixel values to range [-1, 1].
+        cv::Mat float_image;
+        resized_image.convertTo(float_image, CV_32FC1, 1.0 / 127.5, -1.0); // Scales 0-255 to [-1, 1]
+        std::cout << "Image normalized to [-1, 1] range." << std::endl;
+
+        // Ensure the data is contiguous in memory.
+        if (!float_image.isContinuous()) {
+            float_image = float_image.clone();
+        }
+
+        // Prepare the input tensor vector.
+        const size_t input_tensor_size = batch_size * input_channels * input_height * input_width;
+        std::vector<float> input_tensor_values(input_tensor_size);
+        std::memcpy(input_tensor_values.data(), float_image.data, input_tensor_size * sizeof(float));
+        std::cout << "Image data copied to input tensor." << std::endl;
+
+        std::vector<int64_t> input_shape = {
+            batch_size, input_channels, input_height, input_width
+        };
+
+        // --- 8. Create Input Tensor ---
+        Ort::Value input_tensor = Ort::Value::CreateTensor<float>(
+            memory_info,
+            input_tensor_values.data(),
+            input_tensor_size,
+            input_shape.data(),
+            input_shape.size()
+        );
+        assert(input_tensor.IsTensor() && input_tensor.GetTensorTypeAndShapeInfo().GetElementType() == ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT);
+        std::cout << "Input tensor created." << std::endl;
+
+        // --- 9. Define Input and Output Names ---
+        const char* input_names_char[] = {input_node_names[0].get()};
+        const char* output_names_char[] = {output_node_names[0].get()};
+
+        // --- 10. Run Inference ---
+        std::cout << "Running inference..." << std::endl;
+        auto output_tensors = session.Run(
+            Ort::RunOptions{nullptr},
+            input_names_char,
+            &input_tensor,
+            1,
+            output_names_char,
+            1
+        );
+        std::cout << "Inference complete!" << std::endl;
+
+        // --- 11. Process Output ---
+        Ort::Value& output_tensor = output_tensors[0];
+        float* output_data = output_tensor.GetTensorMutableData<float>();
+        Ort::TensorTypeAndShapeInfo output_tensor_info = output_tensor.GetTensorTypeAndShapeInfo();
+        std::vector<int64_t> actual_output_shape = output_tensor_info.GetShape();
+
+        if (actual_output_shape.empty() || (actual_output_shape.size() == 2 && actual_output_shape[0] == 1 && actual_output_shape[1] == 1)) {
+            std::cout << "Predicted steering angle: " << output_data[0] << std::endl;
+        } else {
+            std::cout << "Unexpected output shape. Printing first element: " << output_data[0] << std::endl;
+        }
     }
-
-    // Prepare the input tensor vector.
-    // The model expects a single batch, 1 channel (grayscale), 66 height, 200 width.
-    const size_t input_tensor_size = batch_size * input_channels * input_height * input_width;
-    std::vector<float> input_tensor_values(input_tensor_size);
-
-    // Copy the processed image data from cv::Mat to the std::vector<float>.
-    // Since float_image is CV_32FC1 (single channel float), its data is already flat and ready to copy.
-    std::memcpy(input_tensor_values.data(), float_image.data, input_tensor_size * sizeof(float));
-    std::cout << "Image data copied to input tensor." << std::endl;
-
-    std::vector<int64_t> input_shape = {
-        batch_size, input_channels, input_height, input_width
-    };
-
-
-    // --- 8. Create Input Tensor ---
-    // Create ONNX Runtime input tensor from our preprocessed image data
-    Ort::Value input_tensor = Ort::Value::CreateTensor<float>(
-        memory_info,
-        input_tensor_values.data(), // Pointer to the image data
-        input_tensor_size,          // Total number of elements
-        input_shape.data(),         // Pointer to the shape array
-        input_shape.size()          // Number of dimensions in the shape
-    );
-
-    // Double-check if the input tensor is valid
-    assert(input_tensor.IsTensor() && input_tensor.GetTensorTypeAndShapeInfo().GetElementType() == 
-            ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT);
-    std::cout << "Input tensor created." << std::endl;
-
-    // --- 9. Define Input and Output Names ---
-    // The C API expects const char* arrays for input/output names.
-    // Use the names retrieved from the model (input_node_names, output_node_names).
-    const char* input_names_char[] = {input_node_names[0].get()};
-    const char* output_names_char[] = {output_node_names[0].get()};
-
-    // --- 10. Run Inference ---
-    std::cout << "Running inference..." << std::endl;
-    // Ort::RunOptions run_options{nullptr}; // Can set options here if needed
-    auto output_tensors = session.Run(
-        Ort::RunOptions{nullptr},      // Run options (can be nullptr for default)
-        input_names_char,              // Array of input names
-        &input_tensor,                 // Array of input Ort::Value pointers
-        1,                             // Number of inputs (only one in this case)
-        output_names_char,             // Array of output names
-        1                              // Number of outputs (only one in this case)
-    );
-    std::cout << "Inference complete!" << std::endl;
-
-    // --- 11. Process Output ---
-    // Get the output tensor (assuming there's only one output)
-    Ort::Value& output_tensor = output_tensors[0];
-
-    // Get the raw pointer to the output data
-    float* output_data = output_tensor.GetTensorMutableData<float>();
-
-    // Get the shape of the output tensor
-    Ort::TensorTypeAndShapeInfo output_tensor_info = output_tensor.GetTensorTypeAndShapeInfo();
-    std::vector<int64_t> actual_output_shape = output_tensor_info.GetShape();
-
-    // The PilotNet model typically outputs a single float value (steering angle).
-    // The output shape should be (1, 1) or just (1) if it's flattened.
-    if (actual_output_shape.empty()) { // For scalar output, shape might be empty or {1}
-        std::cout << "Predicted steering angle (scalar): " << output_data[0] << std::endl;
-    } else if (actual_output_shape.size() == 2 && actual_output_shape[0] == 1 && actual_output_shape[1] == 1) {
-        std::cout << "Predicted steering angle (batch 1, element 1): " << output_data[0] << std::endl;
-    } else {
-        std::cout << "Unexpected output shape. Printing first element: " << output_data[0] << std::endl;
-        // You might want to print more elements or iterate if your model output is different
-        // For example, if it was (1, N) for N classes:
-        // for (size_t i = 0; i < output_tensor_info.GetElementCount(); ++i) {
-        //     std::cout << "Output[" << i << "]: " << output_data[i] << std::endl;
-        // }
-    }
-
+}    
+  
     // --- End of main function ---
 
     return 0;

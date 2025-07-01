@@ -35,9 +35,9 @@ The deep learning model was trained and evaluated on a dedicated Kaggle notebook
 
 ## C++ Inference Module
 
-For high-performance model deployment, a dedicated C++ inference module has been developed. This module leverages **ONNX Runtime (v1.17.1)** to efficiently load and execute pre-trained ONNX models, such as the PilotNet for lane keeping.
+For high-performance model deployment, a C++ inference module has been developed. This module leverages **ONNX Runtime (v1.17.1)** to load and execute pre-trained ONNX models, such as the PilotNet for lane keeping.
 
-For comprehensive setup, build, and run instructions for the C++ inference application, please refer to its detailed documentation:
+Fo setup, build, and run instructions for the C++ inference application, please refer to its detailed documentation:
 [**`src/cpp/README_inference.md`**](src/cpp/README_inference.md)
 
 ### Real Image Inference
@@ -47,4 +47,4 @@ The C++ module includes functionalities for:
 * Preprocessing steps such as resizing, grayscale conversion, and normalisation, tailored to the model's input requirements.
 * Feeding the processed image data directly into the ONNX model for inference.
 
-This allows for direct application of the trained models on actual visual inputs, moving beyond dummy data for testing and into practical inference scenarios.
+This allows for direct application of the trained models on actual visual inputs. **This enables a robust and performant pathway for integrating the AI model into real-time or embedded systems.**

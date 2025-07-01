@@ -1,109 +1,95 @@
+# C++ Inference Module for Lane Keeping Model
 
-## Lane Keeping Inference (C++ with ONNX Runtime)
+This module provides a C++ implementation for performing inference using the NVIDIA PilotNet model, leveraging ONNX Runtime for efficient model execution and OpenCV for image preprocessing. It supports both dummy input testing and real-time inference on actual image data.
 
-This project demonstrates how to perform neural network inference in a C++ console application using the ONNX Runtime library. It's configured to load and run an [NVIDIA PilotNet model] (https://www.kaggle.com/code/afsanehm/deep-learning-for-simulated-driving) for a lane-keeping task, taking dummy image data as input and predicting a steering angle.
-- This setup has been successfully tested on macOS (ARM64 architecture) using ONNX Runtime v1.17.1.
+## Table of Contents
 
-### Project structur for this section
+* [Dependencies](#dependencies)
+* [Setup Instructions](#setup-instructions)
+    * [1. Download ONNX Runtime](#1-download-onnx-runtime)
+    * [2. Install OpenCV](#2-install-opencv)
+    * [3. Place the ONNX Model](#3-place-the-onnx-model)
+    * [4. Prepare Test Images (for Real Data Inference)](#4-prepare-test-images-for-real-data-inference)
+* [Build and Run](#build-and-run)
+    * [Build Instructions](#build-instructions)
+    * [Running Dummy Input Inference](#running-dummy-input-inference)
+    * [Running Real Image Inference](#running-real-image-inference)
 
-```
-simulated-av-lane-assist/
-├── models/
-│   └── nvidia_pilotnet.onnx  <-- ONNX model
-├── src/
-│   └── cpp/
-│   │    ├── CMakeLists.txt
-│   │    └── inference_test.cpp
-│   │    └── build/                 <-- CMake build directory 
-│   │        └── lane_keeping_inference  <-- Executable will be here after build
-    └── README.md 
-├── third_party/
-│   └── onnxruntime-osx-arm64-1.17.1/  <-- Extracted ONNX Runtime package goes here
-│       ├── include/
-│       └── lib/
-└── README.md
-
-```
+---
 
 ## Dependencies
 
 * **CMake:** Version 3.10 or higher.
-* **C++ Compiler:** A modern C++ compiler (e.g., AppleClang on macOS, GCC, MSVC) supporting C++17 standard.
-* **ONNX Runtime:** Specifically, **v1.17.1 for macOS ARM64**. Other versions or platforms may require adjustments.
-* **OpenCV:** A popular computer vision library. Installed via Homebrew on macOS. (required  for Real Image Data Inference)
+* **C++ Compiler:** A modern C++ compiler (e.g., AppleClang on macOS, GCC, MSVC) supporting C++17 standard).
+* **ONNX Runtime:** Specifically, **v1.17.1 for macOS ARM64**. Other versions or platforms may require adjustments. This is the ONNX inference engine.
+* **OpenCV:** A popular computer vision library, essential for image loading, manipulation, and preprocessing (required for Real Image Data Inference).
 
 ## Setup Instructions
 
-1.  **Download ONNX Runtime:**
-    Download the pre-built ONNX Runtime package for macOS ARM64 v1.17.1 (or the version appropriate for your system). You can typically find this on the [ONNX Runtime GitHub Releases page](https://github.com/microsoft/onnxruntime/releases).
+These steps will guide you through setting up the necessary components to build and run the C++ inference module.
 
-2.  **Extract ONNX Runtime:**
-    Extract the downloaded `onnxruntime-osx-arm64-1.17.1.zip` file. Place the extracted folder (e.g., `onnxruntime-osx-arm64-1.17.1`) into a `third_party/` directory at the root directory of the `simulated-av-lane-assist` project.
+### 1. Download ONNX Runtime
 
-    ```
-    mkdir third_party
-    unzip /path/to/downloaded/onnxruntime-osx-arm64-1.17.1.zip -d third_party/
-    ```
+Download the pre-built ONNX Runtime package for macOS ARM64 v1.17.1 (or the version appropriate for your system) from the [ONNX Runtime GitHub Releases page](https://github.com/microsoft/onnxruntime/releases).
 
-3.  **Place the ONNX Model:**
-    Ensure your ONNX model file (e.g., `nvidia_pilotnet.onnx`) is placed inside the `models/` directory at the root of your `simulated-av-lane-assist` project.
+Extract the downloaded `.zip` file. Place the extracted folder (e.g., `onnxruntime-osx-arm64-1.17.1`) into a `third_party/` directory at the **root of the `simulated-av-lane-assist` project**.
 
-    ```
-    mkdir models
-    mv /path/to/your/nvidia_pilotnet.onnx models/
-    ```
-4.  **Install OpenCV:** (required  for Real Image Data Inference)
-    If you're on macOS, the easiest way to install OpenCV is using Homebrew:
-    ```bash
-    # Install Homebrew if you don't have it (skip if already installed)
-    /bin/bash -c "$(curl -fsSL [https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh))"
+```bash
+mkdir -p third_party
+unzip /path/to/downloaded/onnxruntime-osx-arm64-1.17.1.zip -d third_party/
+```
 
-    # Install OpenCV via Homebrew
-    brew install opencv
-    ```
-    For other operating systems, please refer to the [official OpenCV installation guide](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) or relevant package managers.
+Ensure `third_party/` is listed in your project's `.gitignore` file.
 
-## Build Instructions
+### 2. Install OpenCV
 
-1.  **Create a build directory:**
-    Navigate to the `src/cpp/` directory and create a `build` subdirectory if it doesn't already exist.
+```bash
+# Install Homebrew (skip if already installed)
+/bin/bash -c "$(curl -fsSL [https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh))"
 
-    ```bash
-    cd simulated-av-lane-assist/src/cpp/
-    mkdir -p build
-    cd build
-    ```
+# Install OpenCV via Homebrew
+brew install opencv
+```
 
-2.  **Configure CMake:**
-    From inside the `build` directory, run CMake to configure the project.
+For other operating systems, please refer to the [official OpenCV installation](https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html) guide or relevant package managers.
 
-    ```bash
-    cmake ..
-    ```
-    * This step detects the compiler and generates the build system (e.g., Makefiles). You should see output indicating successful configuration.
+### 3. Place the ONNX Model
 
-3.  **Build the project:**
-    From inside the `build` directory, trigger the compilation and linking process.
+Ensure your ONNX model file (e.g., `nvidia_pilotnet.onnx`) is placed inside the `models/` directory at the root of `simulated-av-lane-assist` project.
 
-    ```bash
-    make
-    ```
-    * You should see progress indicators (`[ 50%] Building CXX object...`, `[100%] Linking CXX executable...`) and finally `[100%] Built target lane_keeping_inference`.
+### 4. Prepare Test Images (for Real Data Inference)
 
-## Running the Application
+ * You can use 'src/python/data_generator.py' to create some images for straigth and curved roads scenarios.
+ * The `./data/test_images.png` contains ywo images that I used to test the real inference.
 
-After a successful build, the executable `lane_keeping_inference` will be located in the `simulated-av-lane-assist/src/cpp/build/` directory.
+## Build and Run
 
-1.  **Run the executable:**
-    From inside the `build` directory:
+ 1. Navigate to the build directory:
+ ```bash
+  cd /path/to/your/simulated-av-lane-assist/src/cpp/build
+```
+ 2. Run CMake to configure the project:
 
-    ```bash
-    ./lane_keeping_inference
-    ```
+  ```bash
+   cmake ..
+  ```
+Ensure you see messages confirming ONNX Runtime and OpenCV were found.
 
-## Inference using Real Image Data
+## Build the executables:
 
-This section details the enhancements to the C++ inference module to process actual image data.
+```bash
+   make
+```
+This will compile `inference_test.cpp` and `inference_real.cpp`, creating `lane_keeping_test_inference` and `lane_keeping_real_inference` executables inside `build/` directory or  in a `bin/` directory at the project root, as configured in `CMakeLists.txt`).
 
----
+## Running Dummy Input Inference
+
+This executable (`lane_keeping_real_inference`) loads and preprocesses .png images from the `data/test_images/` directory and performs inference on them.
+
+```bash
+/path/to/your/simulated-av-lane-assist/bin/lane_keeping_real_inference
+```
+
+You should see output for each image processed, including its filename and the predicted steering angle. Different angles are expected for images representing straight vs. curved roads.
+
 

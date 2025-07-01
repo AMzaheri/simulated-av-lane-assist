@@ -25,9 +25,9 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "data_real_inference" #run_v7_DiversifiedCurvedMovement_v15" # Updated run name for diversification
+CURRENT_RUN_NAME = "data_real_inference_straight" #run_v7_DiversifiedCurvedMovement_v15" # Updated run name for diversification
 NUM_SAMPLES = 50 
-ROAD_TYPE = "curved" # Set to "straight" or "curved" here
+ROAD_TYPE = "straight" # Set to "straight" or "curved" here
 
 IMAGES_SUBDIR = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "images")
 LABELS_FILE_PATH = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "labels.csv")
