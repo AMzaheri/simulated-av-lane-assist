@@ -14,6 +14,8 @@ A simulated autonomous driving project implementing a lane-keeping assistant usi
 │     ├── cpp/
 │     └── python/
 ├── third_party/        <-- Contains external dependencies like ONNX Runtime
+    ├── cpp/
+    └── python/
 ```
 
 ## Dataset

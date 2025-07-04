@@ -1,17 +1,32 @@
 name: lane_keeping
 channels:
   - pytorch
-  - defaults
+  - defaults # Keep both channels for broader package access
 dependencies:
-  - python=3.9
-
-  - pip=25.1
+  - python=3.9 
+  # Core conda packages from the remote 'dev' branch, simplified by removing explicit build strings
+  # These are fundamental libraries that conda typically manages well
+  - ca-certificates
+  - libcxx # Important for macOS/Linux C++ runtime libraries
+  - libffi
+  - ncurses
+  - openssl
+  - readline
+  - setuptools # Good to explicitly have for pip functionality
+  - sqlite
+  - tk
+  - tzdata
+  - wheel # Good to explicitly have for pip functionality
+  - xz
+  - zlib
+  - pip # Ensure pip itself is installed as a conda package
   - pip:
+    # I'll use the newer numpy from the remote here for general compatibility.
     - torch==2.7.1
-    - torchvision==0.18.0 
-    - onnx=1.18.0
-    - onnxruntime=1.19.2
-    - numpy==2.0.1
+    - torchvision==0.18.0
+    - onnx==1.18.0
+    - onnxruntime==1.19.2
+    - numpy==2.0.2 # Taking the newer version for numpy from the remote
     - pillow==11.2.1
     - pygame==2.6.1
 prefix: /Users/afsanehm/anaconda3/envs/lane_keeping

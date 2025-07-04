@@ -6,8 +6,8 @@ from PIL import Image
 
 # --- Curve Following Constants ---
 LOOK_AHEAD_DISTANCE = 100 # How far ahead (in pixels) the car "looks" on the curve
-KP_ANGLE = 0.75 #0.6            # Proportional gain for angle error (tune this!)
-KP_OFFSET = 0.1 # 0.05          # Proportional gain for offset error (tune this!)
+KP_ANGLE = 0.75 # Proportional gain for angle error (tuned for inference test images)
+KP_OFFSET = 0.1 # Proportional gain for offset error (tuned for inference test images)
 
 # Import simulator components (keep all these imports)
 from simulator import (
@@ -25,8 +25,9 @@ from simulator import (
 #-------------------------------------------------------
 # --- Data Generation Constants
 DATA_DIR = "data"
-CURRENT_RUN_NAME = "data_real_inference_straight" #run_v7_DiversifiedCurvedMovement_v15" # Updated run name for diversification
-NUM_SAMPLES = 50 
+# These settings are configured for generating images to test real inference
+CURRENT_RUN_NAME = "data_real_inference_straight"
+NUM_SAMPLES = 50
 ROAD_TYPE = "straight" # Set to "straight" or "curved" here
 
 IMAGES_SUBDIR = os.path.join(DATA_DIR, CURRENT_RUN_NAME, "images")
@@ -90,7 +91,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
                 car.steer(-2)
             elif car.angle < 85: # If car is angled too much to the right (e.g., angle 80), steer left
                 car.steer(2)
-            
+
             steering_label = 0 # Default to 0 for straight unless offset
             lane_center_x = SCREEN_WIDTH / 2
             horizontal_offset = car.x - lane_center_x
@@ -99,11 +100,11 @@ def generate_data(screen, clock, car, num_samples, road_type):
             # --- Environment Reset for straight road (Corrected) ---
             # If car goes too far off the screen, reset it to the bottom
             if car.y < -CAR_HEIGHT or car.y > SCREEN_HEIGHT + CAR_HEIGHT:
-                 car.x = SCREEN_WIDTH / 2 + np.random.uniform(-20, 20)
-                 car.y = SCREEN_HEIGHT - CAR_HEIGHT - 50
-                 car.angle = 90
-                 car.camera_offset_y = CAMERA_Y_OFFSET_FROM_CAR_CENTER
-            
+                car.x = SCREEN_WIDTH / 2 + np.random.uniform(-20, 20)
+                car.y = SCREEN_HEIGHT - CAR_HEIGHT - 50
+                car.angle = 90
+                car.camera_offset_y = CAMERA_Y_OFFSET_FROM_CAR_CENTER
+
         elif road_type == "curved":
             # --- CURVED ROAD LOGIC: Pure Pursuit-like Controller ---
 
@@ -112,7 +113,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
             if offset_change_timer >= OFFSET_CHANGE_INTERVAL:
                 # Randomly choose a target offset within the lane boundaries
                 # e.g., max 1/3 of the lane width from center to either side
-                target_lateral_offset = np.random.uniform(-LANE_WIDTH, LANE_WIDTH) 
+                target_lateral_offset = np.random.uniform(-LANE_WIDTH, LANE_WIDTH)
                 offset_change_timer = 0
 
             # 1. Calculate car's position relative to the curve's center (for math coordinates)
@@ -124,7 +125,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
             # 3. Calculate the ideal target point on the curve (look-ahead point)
             angular_step_rad = LOOK_AHEAD_DISTANCE / CURVE_RADIUS
-            target_polar_angle_rad = current_polar_angle_rad + angular_step_rad 
+            target_polar_angle_rad = current_polar_angle_rad + angular_step_rad
 
             # Calculate the target (x, y) coordinates on the ideal curve (Pygame coordinates)
             target_x = CURVE_CENTER_X + CURVE_RADIUS * np.cos(target_polar_angle_rad)
@@ -132,7 +133,7 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
             # 4. Calculate the required heading angle for the car to point towards the target
             dx = target_x - car.x
-            dy_for_arctan2 = car.y - target_y 
+            dy_for_arctan2 = car.y - target_y
 
             angle_to_target_deg = np.degrees(np.arctan2(dy_for_arctan2, dx))
             angle_to_target_deg = (angle_to_target_deg + 360) % 360
@@ -150,9 +151,9 @@ def generate_data(screen, clock, car, num_samples, road_type):
 
             # 7. Determine steering label (combining angle error and effective offset error)
             steering_label = angle_error * KP_ANGLE - effective_offset_error * KP_OFFSET
-            
+
             # Add a small random component for diversity
-            if np.random.rand() < 0.1: #0.05: # 5% chance of random deviation per frame
+            if np.random.rand() < 0.1: # 5% chance of random deviation per frame
                 steering_label += np.random.uniform(-0.6, 0.6) # Adjust magnitude as needed
 
             # Apply steering to the car
@@ -171,28 +172,28 @@ def generate_data(screen, clock, car, num_samples, road_type):
                car.x < CURVE_CENTER_X - CURVE_RADIUS - ROAD_WIDTH/2 - CAR_WIDTH/2 or \
                car.y > CURVE_CENTER_Y + ROAD_WIDTH/2 + CAR_HEIGHT/2 or \
                np.sqrt(car_rel_x**2 + car_rel_y_math**2) > CURVE_RADIUS + ROAD_WIDTH/2 + CAR_WIDTH:
-                
+
                 # --- Randomize Reset Position and Angle for Diversification ---
                 ideal_reset_x = CURVE_CENTER_X
                 ideal_reset_y = CURVE_CENTER_Y - CURVE_RADIUS
                 ideal_reset_angle = 90
 
                 # Add random perturbations (lateral offset and angle deviation)
-                # Max lateral offset should be less than half lane width to keep it on road.
-                reset_lateral_offset = np.random.uniform(-LANE_WIDTH / 2.06, LANE_WIDTH / 2.06 ) # for inference test images #2.05, 2.05) 
-                reset_angle_deviation = np.random.uniform(-35, 35)  # for test images# -20, 20) # +/- 7 degrees
+                # These settings are specifically for generating test images for real inference
+                reset_lateral_offset = np.random.uniform(-LANE_WIDTH / 2.06, LANE_WIDTH / 2.06)
+                reset_angle_deviation = np.random.uniform(-35, 35)
 
                 # Apply offset perpendicular to the initial heading (angle 90 is up, so lateral is along X)
                 car.x = ideal_reset_x + reset_lateral_offset
-                car.y = ideal_reset_y 
+                car.y = ideal_reset_y
                 car.angle = ideal_reset_angle + reset_angle_deviation
 
                 car.camera_offset_y = CAMERA_Y_OFFSET_FROM_CAR_CENTER # Reset camera offset
-                
+
                 # Reset offset change timer and target offset for the new segment
-                offset_change_timer = 0 
+                offset_change_timer = 0
                 target_lateral_offset = 0 # Start new segment centered
-            
+
             # Debugging print statements (optional, uncomment to see real-time values)
             # print(f"Car: ({car.x:.1f}, {car.y:.1f}) Angle: {car.angle:.1f} Label: {steering_label:.2f}")
             # print(f"Polar Ang (math): {np.degrees(current_polar_angle_rad):.1f}, Target Ang (math): {np.degrees(target_polar_angle_rad):.1f}")

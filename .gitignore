@@ -220,6 +220,7 @@ data/*.png
 data/*/images/ 
 data/data_real_inference/
 data/data_real_inference_straight/
+
 data/*.csv
 data/.DS_Store
 
