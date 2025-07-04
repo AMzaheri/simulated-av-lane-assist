@@ -48,3 +48,20 @@ The C++ module includes functionalities for:
 * Feeding the processed image data directly into the ONNX model for inference.
 
 This allows for direct application of the trained models on actual visual inputs. **This enables a robust and performant pathway for integrating the AI model into real-time or embedded systems.**
+
+## Continuous Integration / Continuous Deployment (CI/CD)
+
+This project uses GitHub Actions to implement Continuous Integration (CI) for its C++ components, code quality and build reliability.
+
+### Key Aspects:
+* **Automated Builds:** Every push to key branches (like `main` , `dev` and `feature/cpp-inference`) automatically triggers a build process. This compiles the C++ inference executables (`lane_keeping_test_inference` and `lane_keeping_real_inference`) on an Ubuntu Linux environment.
+* **Dependency Management:** The CI pipeline handles the automatic installation of important dependencies such as CMake, build-essential tools, OpenCV, and the ONNX Runtime for Linux (x64).
+* **Automated Testing/Verification:** After a successful build, the pipeline attempts to run the `lane_keeping_test_inference` executable, providing immediate feedback on its runnability and basic functionality.
+* **Cross-Platform Verification:** While development might occur on various operating systems (e.g., macOS), the CI environment consistently builds and tests on Linux, mimicking common deployment environments.
+
+### Build Status:
+You can view the current CI/CD pipeline status and detailed build logs by clicking on the badge below or visiting the [Actions tab](https://github.com/AMzaheri/simulated-av-lane-assist/actions) of this repository.
+
+[![CI Build Status](https://github.com/AMzaheri/simulated-av-lane-assist/workflows/C%2B%2B%20Build%20and%20Test/badge.svg)](https://github.com/AMzaheri/simulated-av-lane-assist/actions)
+
+---
