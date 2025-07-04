@@ -36,17 +36,17 @@ jobs:
         wget -q ${ONNX_RUNTIME_URL} -O third_party/onnxruntime.tgz
         tar -xzf third_party/onnxruntime.tgz -C third_party/ --strip-components=1 # Extract to third_party/
 
-    # NEW DEBUG STEP: Verify the extraction
-    - name: Verify ONNX Runtime Extraction Path
-      run: |
-        echo "Listing contents of third_party/:"
-        ls -F third_party/
-        echo ""
-        echo "Listing contents of third_party/include/:"
-        ls -F third_party/include/
-        echo ""
-        echo "Listing contents of third_party/lib/:"
-        ls -F third_party/lib/
+    # DEBUG STEP: Verify the extraction
+    #- name: Verify ONNX Runtime Extraction Path
+    #  run: |
+    #    echo "Listing contents of third_party/:"
+    #    ls -F third_party/
+    #    echo ""
+    #    echo "Listing contents of third_party/include/:"
+    #    ls -F third_party/include/
+    #    echo ""
+    #    echo "Listing contents of third_party/lib/:"
+    #    ls -F third_party/lib/
 
     - name: Configure CMake
       # Navigate to cpp directory before running cmake
@@ -59,7 +59,25 @@ jobs:
       run: |
         cd src/cpp/build
         make -j$(nproc) # Use all available cores for faster build
-
+  
+    # NEW DEBUG STEP: List files to find executables
+    - name: Debug - Locate Built Executables
+      run: |
+        echo "Contents of repository root (expected bin/ directory):"
+        ls -F .
+        echo ""
+        echo "Contents of src/cpp/ (parent of build directory):"
+        ls -F src/cpp/
+        echo ""
+        echo "Contents of src/cpp/build/ (where make was run):"
+        ls -F src/cpp/build/
+        echo ""
+        echo "Contents of src/cpp/build/bin/ (if executables were placed there directly):"
+        ls -F src/cpp/build/bin/ || echo "src/cpp/build/bin/ not found or empty." # Handles if dir doesn't exist
+        echo ""
+        echo "Contents of bin/ at repo root (where CMAKE_RUNTIME_OUTPUT_DIRECTORY points):"
+        ls -F bin/ || echo "bin/ at repo root not found or empty." # Handles if dir doesn't exist
+    
     - name: Verify Executables (Optional)
       run: |
         # Check if the executables were created in the bin directory
