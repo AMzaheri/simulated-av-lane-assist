@@ -54,6 +54,8 @@ find_library(ONNXRUNTIME_LIB
 
 if(NOT ONNXRUNTIME_LIB)
     message(FATAL_ERROR "ONNX Runtime library not found at ${ONNXRUNTIME_INSTALL_PATH}/lib")
+else()
+    message(STATUS "ONNX Runtime library found at: ${ONNXRUNTIME_LIB}")
 endif()
 
 # --- End ONNX Runtime Configuration ---

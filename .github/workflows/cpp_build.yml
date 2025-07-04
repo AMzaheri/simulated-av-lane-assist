@@ -36,6 +36,18 @@ jobs:
         wget -q ${ONNX_RUNTIME_URL} -O third_party/onnxruntime.tgz
         tar -xzf third_party/onnxruntime.tgz -C third_party/ --strip-components=1 # Extract to third_party/
 
+    # NEW DEBUG STEP: Verify the extraction
+    - name: Verify ONNX Runtime Extraction Path
+      run: |
+        echo "Listing contents of third_party/:"
+        ls -F third_party/
+        echo ""
+        echo "Listing contents of third_party/include/:"
+        ls -F third_party/include/
+        echo ""
+        echo "Listing contents of third_party/lib/:"
+        ls -F third_party/lib/
+
     - name: Configure CMake
       # Navigate to cpp directory before running cmake
       run: |
