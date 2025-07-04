@@ -77,11 +77,13 @@ jobs:
         echo ""
         echo "Contents of bin/ at repo root (where CMAKE_RUNTIME_OUTPUT_DIRECTORY points):"
         ls -F bin/ || echo "bin/ at repo root not found or empty." # Handles if dir doesn't exist
-    
+   
     - name: Verify Executables (Optional)
       run: |
-        # Check if the executables were created in the bin directory
-        ls -l bin/lane_keeping_test_inference
-        ls -l bin/lane_keeping_real_inference
-        # You could also try running a dummy test
-        ./bin/lane_keeping_test_inference
+        # Change directory to where executables are actually built
+        cd src/cpp/build
+        echo "Verifying executables in current directory (src/cpp/build/):"
+        ls -l lane_keeping_test_inference
+        ls -l lane_keeping_real_inference
+        echo "Attempting to run a dummy test:"
+        ./lane_keeping_test_inference # Try running the test executable 
